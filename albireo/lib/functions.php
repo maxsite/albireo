@@ -171,6 +171,17 @@ function getCurrentUrl()
     // декодируем по стандарту
     $url = urldecode($url);
 
+    // подчистка адреса от XSS-атаки
+
+    // удалим все тэги
+    $url = strip_tags($url); 
+    
+    // удалим «опасные» символы - в адресе нельзя их использовать
+    $url = str_replace(['<', '>', '"', "'", '(', '  {', '['], '', $url);
+
+    // амперсанд меняем на html-вариант
+    $url = str_replace('&', '&amp;', $url); 
+
     // отсекаем часть ?-get
     if (strpos($url, '?') !== false) {
         $u = explode('?', $url);
