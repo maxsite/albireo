@@ -134,13 +134,24 @@ function matchUrlPage()
             // если совпал, то смотрим slug
             $slug = $page['slug'] ?? false;
 
-            if (!$slug) continue; // не указан
+            if (!$slug) continue; // не указан, но должен быть
             if ($slug == '/') $slug = ''; // преобразование для главной
 
             if (strtolower($slug) == $currentUrl['url']) {
                 // есть совпадение
                 $result = $file; // имя файла
                 break;
+            } else {
+                // slug не совпал, поэтому смотрим поле slug-pattern, где может храниться регулярка
+                $slug_pattern = $page['slug-pattern'] ?? false;
+
+                if ($slug_pattern) {
+                    if (preg_match('!^' . $slug_pattern . '$!iu', $currentUrl['url'])) {
+                        // есть совпадение
+                        $result = $file; // имя файла
+                        break;
+                    }
+                }
             }
         }
     }
@@ -174,13 +185,13 @@ function getCurrentUrl()
     // подчистка адреса от XSS-атаки
 
     // удалим все тэги
-    $url = strip_tags($url); 
-    
+    $url = strip_tags($url);
+
     // удалим «опасные» символы - в адресе нельзя их использовать
     $url = str_replace(['<', '>', '"', "'", '(', '  {', '['], '', $url);
 
     // амперсанд меняем на html-вариант
-    $url = str_replace('&', '&amp;', $url); 
+    $url = str_replace('&', '&amp;', $url);
 
     // отсекаем часть ?-get
     if (strpos($url, '?') !== false) {
@@ -195,7 +206,7 @@ function getCurrentUrl()
     $method = strtoupper($_SERVER['REQUEST_METHOD']);
 
     // в POST может быть указан другой метод в поле _method
-    if ($method == 'POST' and isset($_POST['_method'])) 
+    if ($method == 'POST' and isset($_POST['_method']))
         $method = strtoupper($_POST['_method']);
 
     // сохраняем в хранилище
