@@ -30,6 +30,12 @@ function pageOut()
 
     // если файл есть
     if ($mainFile and file_exists(LAYOUT_DIR . $mainFile)) {
+        
+        // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
+        if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) { 
+            require DATA_DIR . $pageData['init-file'];
+        }
+        
         ob_start(); // включаем буферизацию
         require LAYOUT_DIR . $mainFile; // подключаем шаблон
         $content = ob_get_contents(); // забрали результат
