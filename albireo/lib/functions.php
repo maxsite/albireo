@@ -30,12 +30,12 @@ function pageOut()
 
     // если файл есть
     if ($mainFile and file_exists(LAYOUT_DIR . $mainFile)) {
-        
+
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
-        if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) { 
+        if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
             require DATA_DIR . $pageData['init-file'];
         }
-        
+
         ob_start(); // включаем буферизацию
         require LAYOUT_DIR . $mainFile; // подключаем шаблон
         $content = ob_get_contents(); // забрали результат
@@ -237,12 +237,27 @@ function readPages()
         return; // и выходим
     }
 
-    // все файлы страниц
+    // основные файлы страниц
     $allFiles = glob(DATA_DIR . '*.php');
 
-    // убираем те, которые начинаются с «_»
+    // если есть каталог pages, то проходимся по нему в рекурсивном режиме
+    $pages = [];
+
+    if (is_dir(DATA_DIR . 'pages')) {
+        $directory = new \RecursiveDirectoryIterator(DATA_DIR . 'pages');
+        $iterator = new \RecursiveIteratorIterator($directory);
+
+        foreach ($iterator as $info) {
+            if ($info->isFile() and $info->getExtension() == 'php') $pages[] = $info->getPathname();
+        }
+    }
+
+    // если файлы в pages найдены, то объединяем их с основными
+    if ($pages) $allFiles = array_merge($allFiles, $pages);
+
+    // убираем те, которые начинаются с «_» и «.»
     $allFiles = array_filter($allFiles, function ($x) {
-        if (strpos(basename($x), '_') === 0)
+        if (strpos(basename($x), '_') === 0 or strpos(basename($x), '.') === 0 )
             return false;
         else
             return true;
@@ -280,9 +295,27 @@ function readPages()
                     $info[trim(substr($a2, 0, $pos))] = trim(substr($a2, $pos + 1));
             }
 
-            // если у файла не указано поле slug, то делаем его автоматом равным имени файлу
-            if (!isset($info['slug']) or $info['slug'] == '')
-                $info['slug'] = str_replace('.php', '', basename($file));
+            // если у файла не указано поле slug, то делаем его автоматом
+            if (!isset($info['slug']) or $info['slug'] == '') {
+                
+                // пути нужны относительно DATA_DIR
+                // возможно, что файл в подкаталоге pages
+                $f = str_replace(DATA_DIR . 'pages' . DIRECTORY_SEPARATOR, '', $file);
+
+                // или в самом DATA_DIR
+                $f = str_replace(DATA_DIR, '', $f);
+
+                // инфо о файле
+                $parts = pathinfo($f);
+
+                // берём только путь и имя файла без расширения
+                $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
+
+                // делаем замены слэшей на URL
+                $slug = str_replace(['.\\', '\\'], ['', '/'], $slug);
+                
+                $info['slug'] = $slug; // готовый slug
+            }
 
             $pagesInfo[$file] = $info; // сохраним в общих данных
         }
@@ -303,6 +336,9 @@ function readPages()
  */
 function getCache(string $file)
 {
+    // если в конфигурации ключ noCache = true, то кэш отключаем (режим отладки)
+    if (getConfig('noCache', false)) return false;
+
     if (file_exists(CACHE_DIR . $file)) {
         // проверим не устарел ли кэш
 
@@ -312,27 +348,20 @@ function getCache(string $file)
         // и время всех файлов в каталоге albireo-data
         $allFiles = [];
 
-        // вначале список всех файлов в DATA_DIR
-        $files = glob(DATA_DIR . '*');
+        // рекурсивно обходим каталог DATA_DIR
+        $directory = new \RecursiveDirectoryIterator(DATA_DIR);
+        $iterator = new \RecursiveIteratorIterator($directory);
 
-        // добавляем если есть
-        if ($files) $allFiles = $files;
-
-        // теперь смотрим подкаталоги 1-го уровня (больше не нужно)
-        $dirs = glob(DATA_DIR . '*', GLOB_ONLYDIR | GLOB_MARK);
-
-        // смотрим в каждом из них файлы и добавляем в общий массив
-        foreach ($dirs as $dir) {
-            $files = glob($dir . '*');
-
-            if ($files) $allFiles = array_merge($files, $allFiles);
+        foreach ($iterator as $info) {
+            // добавляем только если это файл
+            if ($info->isFile()) $allFiles[] = $info->getPathname();
         }
 
         // находим самый новый файл
         $timeLastModified = 0;
 
         foreach ($allFiles as $f) {
-            $t = filemtime($f);
+            $t = filemtime($f); // время модификации файла
 
             // если этот файл новее, то обновляем $timeLastModified
             if ($t > $timeLastModified) $timeLastModified = $t;
