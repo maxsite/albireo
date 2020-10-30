@@ -4,6 +4,23 @@
  */
 
 /**
+ * Удаление каталога и всех его файлов
+ * https://www.php.net/manual/ru/function.rmdir.php#110489
+ * 
+ * @param $dir - удаляемый каталог
+ */
+function deleteDir(string $dir)
+{
+    $files = array_diff(scandir($dir), ['.', '..']);
+
+    foreach ($files as $file) {
+        (is_dir("$dir/$file")) ? deleteDir("$dir/$file") : unlink("$dir/$file");
+    }
+
+    return rmdir($dir);
+}
+
+/**
  * Вывести сниппет
  * @param $snippet - имя сниппета
  * snippet('twitter'); // выведет файл albireo-data/snippets/twitter.php
@@ -257,7 +274,7 @@ function readPages()
 
     // убираем те, которые начинаются с «_» и «.»
     $allFiles = array_filter($allFiles, function ($x) {
-        if (strpos(basename($x), '_') === 0 or strpos(basename($x), '.') === 0 )
+        if (strpos(basename($x), '_') === 0 or strpos(basename($x), '.') === 0)
             return false;
         else
             return true;
@@ -297,7 +314,7 @@ function readPages()
 
             // если у файла не указано поле slug, то делаем его автоматом
             if (!isset($info['slug']) or $info['slug'] == '') {
-                
+
                 // пути нужны относительно DATA_DIR
                 // возможно, что файл в подкаталоге pages
                 $f = str_replace(DATA_DIR . 'pages' . DIRECTORY_SEPARATOR, '', $file);
@@ -313,7 +330,7 @@ function readPages()
 
                 // делаем замены слэшей на URL
                 $slug = str_replace(['.\\', '\\'], ['', '/'], $slug);
-                
+
                 $info['slug'] = $slug; // готовый slug
             }
 
