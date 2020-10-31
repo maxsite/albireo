@@ -45,6 +45,11 @@ function pageOut()
         $mainFile = getConfig('layout');
     }
 
+    // в конфигурации можно указать файл со своими функциями
+    if ($functionsFile = getConfig('functions')) {
+        if (file_exists($functionsFile)) require_once $functionsFile;
+    }
+
     // если файл есть
     if ($mainFile and file_exists(LAYOUT_DIR . $mainFile)) {
 
@@ -70,13 +75,34 @@ function pageOut()
             if (function_exists($parser))
                 $content = $parser($content); // обработали текст через функцию парсера
         }
+        
+        // Содержимое PRE и CODE можно заменить на html-сущности
+        if (isset($pageData['protect-pre']) and $pageData['protect-pre']) {
+            $content = protectHTMLCode($content);
+        }
+
+        // произвольные php-функции для обработки контента
+        // функция должна принимать только один параметр
+        // функций может быть несколько через пробел
+        // если функция недоступна она игнорируется
+        // text-function: trim
+        if (isset($pageData['text-function']) and $tf = $pageData['text-function']) {
+            $tf = explode(' ', $tf); // список в массив
+            $tf = array_map('trim', $tf); // обрежем пробелы
+
+            // проходимся по ним
+            foreach ($tf as $f) {
+                // если функция есть, то выполняем её
+                if (function_exists($f)) $content = $f($content);
+            }
+        }
 
         // сжатие html-кода
         if (isset($pageData['compress']) and $pageData['compress']) {
             require_once SYS_DIR . 'lib/compress.php'; // подключили файл
 
             $content = compress_html($content); // обработали текст
-        }
+        }  
 
         echo $content; // вывели контент в браузер
     } else {
@@ -282,6 +308,12 @@ function readPages()
 
     $pagesInfo = []; // результирующий массив записей
 
+    // в конфигурации может быть ключ defaultPageData — массив с данными по умолчанию
+    // они объединяются с каждой страницей
+    if ($defaultInfo = getConfig('defaultPageData', [])) {
+        if (!is_array($defaultInfo)) $defaultInfo = [];
+    }
+
     // цикл по всем файлам
     foreach ($allFiles as $file) {
         $content = file_get_contents($file); // считали содержимое
@@ -303,7 +335,8 @@ function readPages()
         if ($content) {
             $a1 = explode("\n", $content); // разделим построчно 
 
-            $info = []; // конечный результат — массив
+            // конечный результат — массив с дефолтными данными
+            $info = $defaultInfo;
 
             foreach ($a1 as $a2) {
                 $pos = strpos($a2, ":"); // найдём первое вхождение «:» 
@@ -439,6 +472,27 @@ function storage(bool $set, string $key, $value, $default)
         $data[$key] = $value; // запись данных
     else
         return $data[$key] ?? $default; // получение данных
+}
+
+/**
+ * Преобразуем текст тэгов PRE и CODE в html-сущности
+ * @param $text - входящий текст 
+ */
+function protectHTMLCode(string $text)
+{
+    $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
+        $t = htmlspecialchars($m[2]); // в html-сущности
+        $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
+        return $m[1] . $t . $m[3];
+    }, $text);
+
+    $text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', function ($m) {
+        $t = htmlspecialchars($m[2]);
+        $t = str_replace('&amp;', '&', $t);
+        return $m[1] . $t . $m[3];
+    }, $text);
+
+    return $text;
 }
 
 /**
