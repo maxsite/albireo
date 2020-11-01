@@ -339,7 +339,7 @@ function readPages()
             $info = $defaultInfo;
 
             foreach ($a1 as $a2) {
-                $pos = strpos($a2, ":"); // найдём первое вхождение «:» 
+                $pos = strpos($a2, ": "); // найдём первое вхождение «: » 
 
                 if ($pos !== false) // если есть, обработаем и в массив результата
                     $info[trim(substr($a2, 0, $pos))] = trim(substr($a2, $pos + 1));
