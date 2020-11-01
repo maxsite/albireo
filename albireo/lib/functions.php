@@ -4,6 +4,47 @@
  */
 
 /**
+ * Получить из pageData ключи вида 
+ *   key[index1]: val 
+ *   key[index2]: val
+ * 
+ * @param $key — искомый ключ
+ * @param $format — html-формат вывода, где используются [key] и [val]
+ * @return array
+ */
+function getKeysPageData($key = 'meta', $format = '<meta property="[key]" content="[val]">')
+{
+    $out = []; // выходной массив
+
+    $pageData = getVal('pageData'); // данные страницы
+
+    // проходимся по данным страницы
+    foreach ($pageData as $k => $v) {
+        // ищем шаблон поиска в ключе массива
+        if (preg_match('!' . $key . '\[(.*?)\]!is', $k, $m)) {
+            // есть совпадение
+
+            // если указан выходной html-формат, то используем его
+            if ($format) { 
+                // для value сделаем спецзамены
+                $vRepl = $v;
+
+                $vRepl = str_replace('[page-description]', getPageDataHtml('description'), $vRepl);
+                $vRepl = str_replace('[page-title]', getPageDataHtml('title'), $vRepl);
+                $vRepl = str_replace('[page-slug]', rtrim(getPageDataHtml('slug'), '/'), $vRepl);
+                $vRepl = str_replace('[site-url]', SITE_URL, $vRepl);
+
+                $out[] = str_replace(['[key]', '[val]'], [$m[1], $vRepl], $format);
+            } else {
+                $out[$m[1]] = $v;
+            }
+        }
+    }
+
+    return $out;
+}
+
+/**
  * Удаление каталога и всех его файлов
  * https://www.php.net/manual/ru/function.rmdir.php#110489
  * 
@@ -75,7 +116,7 @@ function pageOut()
             if (function_exists($parser))
                 $content = $parser($content); // обработали текст через функцию парсера
         }
-        
+
         // Содержимое PRE и CODE можно заменить на html-сущности
         if (isset($pageData['protect-pre']) and $pageData['protect-pre']) {
             $content = protectHTMLCode($content);
@@ -102,7 +143,7 @@ function pageOut()
             require_once SYS_DIR . 'lib/compress.php'; // подключили файл
 
             $content = compress_html($content); // обработали текст
-        }  
+        }
 
         echo $content; // вывели контент в браузер
     } else {
