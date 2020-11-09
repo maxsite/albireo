@@ -106,7 +106,8 @@ function pageOut()
         if (ob_get_length()) ob_end_clean(); // очистили буфер
 
         // если указан парсер
-        if (isset($pageData['parser']) and $pageData['parser']) {
+        // чтобы отключить парсер можно указать «-» (минус)
+        if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
             $parser = $pageData['parser']; // название парсера
             $parserFile = SYS_DIR . 'lib/' . $parser . '.php'; // файл парсера
 
