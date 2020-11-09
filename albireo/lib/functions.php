@@ -398,12 +398,13 @@ function readPages()
 
                 // инфо о файле
                 $parts = pathinfo($f);
-
+                
+                
                 // берём только путь и имя файла без расширения
                 $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
 
                 // делаем замены слэшей на URL
-                $slug = str_replace(['.\\', '\\'], ['', '/'], $slug);
+                $slug = str_replace(['.\\', './', '\\'], ['', '', '/'], $slug);
 
                 $info['slug'] = $slug; // готовый slug
             }
