@@ -8,6 +8,7 @@ description: Albireo Framework
 parser: simple
 compress: 1
 body: class="t-gray200 gr-linear-var" style="--start: #052C31; --end: #094F57;"
+sitemap-priority: 1.0
 
 **/
 ?>

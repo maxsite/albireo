@@ -5,21 +5,43 @@ layout: empty.php
 slug: sitemap.xml
 compress: 0
 parser: -
+sitemap: -
 
 **/
 
 # https://you-site/sitemap.xml
 
-$changefreq = 'monthly';
-$priority = '0.8';
+/**
+  * для изменения можно использовать параметры страницы:
+  * sitemap-changefreq: monthly
+  * sitemap-priority: 0.9
+  *
+  * исключить страницу из sitemap.xml
+  * sitemap: -
+  * 
+**/
+$changefreqDef = 'monthly';
+$priorityDef = '0.5';
 
 $pagesInfo = getVal('pagesInfo');
 
 $out = '';
 
 foreach($pagesInfo as $file => $info) {
+	
+	$slug = $info['slug'];
+	
+	if ($slug == '404') continue; // исключить 404
+	if (isset($info['method']) and strtoupper($info['method']) !== 'GET') continue;
+	if (isset($info['sitemap']) and $info['sitemap'] == '-') continue;
+	
+	$changefreq = $info['sitemap-changefreq'] ?? $changefreqDef;
+	$priority = $info['sitemap-priority'] ?? $priorityDef;
+		
+	if ($slug == '/') $slug = ''; // главная
+	
 	$out .= '<url>' . "\n";
-	$out .= '<loc>' . SITE_URL . $info['slug'] . '/</loc>' . "\n";
+	$out .= '<loc>' . rtrim(SITE_URL . $slug, '/') . '</loc>' . "\n";
 	$out .= '<lastmod>' . date('Y-m-d', filemtime($file)) . '</lastmod>' . "\n";
 	$out .= '<changefreq>' . $changefreq . '</changefreq>' . "\n";
 	$out .= '<priority>' . $priority . '</priority>' . "\n";

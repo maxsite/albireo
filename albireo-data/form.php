@@ -5,6 +5,7 @@ title: Пример формы (отправка POST/AJAX-запроса)
 description: Пример формы (отправка POST/AJAX-запроса)
 slug: form
 slug-static: -
+sitemap: -
 
 **/
 ?>
