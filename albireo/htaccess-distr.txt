@@ -4,6 +4,10 @@ Options -Indexes
 DirectoryIndex index.php
 AddDefaultCharset UTF-8
 
+# for 301-redirect http to https
+# RewriteCond %{HTTPS} !=on
+# RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,QSA,L] 
+
 <IfModule mod_rewrite.c>
 RewriteEngine on
 RewriteBase /
