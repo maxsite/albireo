@@ -4,10 +4,10 @@
  */
 
 /**
- * Получить из pageData ключи вида 
- *   key[index1]: val 
+ * Получить из pageData ключи вида
+ *   key[index1]: val
  *   key[index2]: val
- * 
+ *
  * @param $key — искомый ключ
  * @param $format — html-формат вывода, где используются [key] и [val]
  * @return array
@@ -25,7 +25,7 @@ function getKeysPageData($key = 'meta', $format = '<meta property="[key]" conten
             // есть совпадение
 
             // если указан выходной html-формат, то используем его
-            if ($format) { 
+            if ($format) {
                 // для value сделаем спецзамены
                 $vRepl = $v;
 
@@ -47,7 +47,7 @@ function getKeysPageData($key = 'meta', $format = '<meta property="[key]" conten
 /**
  * Удаление каталога и всех его файлов
  * https://www.php.net/manual/ru/function.rmdir.php#110489
- * 
+ *
  * @param $dir - удаляемый каталог
  */
 function deleteDir(string $dir)
@@ -79,12 +79,21 @@ function pageOut()
     $pageData = getVal('pageData'); // данные страницы
 
     // у страницы может быть свой шаблон
-    if (isset($pageData['layout']) and $pageData['layout'] and file_exists(LAYOUT_DIR . $pageData['layout'])) {
-        $mainFile = $pageData['layout']; // есть такой файл
-    } else {
-        // используем тот, который указан в конфигурации
-        $mainFile = getConfig('layout');
+    $layout = $pageData['layout'] ?? '';
+    $mainFile = ''; // итоговый файл
+
+    if ($layout) {
+        // приоритет файла в LAYOUT_DIR
+        if (file_exists(LAYOUT_DIR . $layout)) {
+            $mainFile = LAYOUT_DIR . $layout; // есть такой файл
+        } else {
+            // возможно файл указан относительно каталога DATA_DIR
+            if (file_exists(DATA_DIR . $layout)) $mainFile = DATA_DIR . $layout;
+        }
     }
+
+    // если ничего не нашли, то используем тот, который указан в конфигурации
+    if (!$mainFile) $mainFile = LAYOUT_DIR . getConfig('layout');
 
     // в конфигурации можно указать файл со своими функциями
     if ($functionsFile = getConfig('functions')) {
@@ -92,7 +101,7 @@ function pageOut()
     }
 
     // если файл есть
-    if ($mainFile and file_exists(LAYOUT_DIR . $mainFile)) {
+    if ($mainFile and file_exists($mainFile)) {
 
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
         if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
@@ -100,7 +109,7 @@ function pageOut()
         }
 
         ob_start(); // включаем буферизацию
-        require LAYOUT_DIR . $mainFile; // подключаем шаблон
+        require $mainFile; // подключаем шаблон
         $content = ob_get_contents(); // забрали результат
 
         if (ob_get_length()) ob_end_clean(); // очистили буфер
@@ -375,13 +384,13 @@ function readPages()
 
         // загоним строчки «key: value» в массив
         if ($content) {
-            $a1 = explode("\n", $content); // разделим построчно 
+            $a1 = explode("\n", $content); // разделим построчно
 
             // конечный результат — массив с дефолтными данными
             $info = $defaultInfo;
 
             foreach ($a1 as $a2) {
-                $pos = strpos($a2, ": "); // найдём первое вхождение «: » 
+                $pos = strpos($a2, ": "); // найдём первое вхождение «: »
 
                 if ($pos !== false) // если есть, обработаем и в массив результата
                     $info[trim(substr($a2, 0, $pos))] = trim(substr($a2, $pos + 1));
@@ -399,8 +408,8 @@ function readPages()
 
                 // инфо о файле
                 $parts = pathinfo($f);
-                
-                
+
+
                 // берём только путь и имя файла без расширения
                 $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
 
@@ -519,7 +528,7 @@ function storage(bool $set, string $key, $value, $default)
 
 /**
  * Преобразуем текст тэгов PRE и CODE в html-сущности
- * @param $text - входящий текст 
+ * @param $text - входящий текст
  */
 function protectHTMLCode(string $text)
 {
@@ -613,5 +622,5 @@ function pr($var, $html = true, $echo = true)
         echo '</pre>';
     }
 }
-        
+
 # end of file
