@@ -246,7 +246,7 @@ function matchUrlPage()
                 $slug_pattern = $page['slug-pattern'] ?? false;
 
                 if ($slug_pattern) {
-                    if (preg_match('!^' . $slug_pattern . '$!iu', $currentUrl['url'])) {
+                    if (preg_match('~^' . $slug_pattern . '$~iu', $currentUrl['url'])) {
                         // есть совпадение
                         $result = $file; // имя файла
                         break;
