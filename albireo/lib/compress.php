@@ -15,7 +15,7 @@ function compress_html($text)
 	$text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', '_compress_html_protect', $text);
 	$text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', '_compress_html_protect', $text);
 	$text = preg_replace_callback('!(<script.*?>)(.*?)(</script>)!is', '_compress_html_protect', $text);
-	$text = preg_replace_callback('!(<style.*?>)(.*?)(</style>)!is', '_compress_html_protect', $text);
+	$text = preg_replace_callback('!(<style.*?>)(.*?)(</style>)!is', '_compres_css_protect', $text);
 
 	// сжатие
 	$text = str_replace("\r", "", $text);
@@ -41,7 +41,7 @@ function compress_html($text)
 }
 
 /**
- *  script и style, которые загоняются в [html_base64]
+ *  script которые загоняются в [html_base64]
  *  callback-функция
  * 
  *  @param $matches matches
@@ -50,6 +50,31 @@ function compress_html($text)
 function _compress_html_protect($m)
 {
 	return $m[1] . '[html_base64]' . base64_encode($m[2]) . '[/html_base64]' . $m[3];
+}
+
+/**
+ *  Сжатите CSS-кода
+ *  Работает очень «мягко», чтобы не влиять на сам css-код
+ *  callback-функция
+ *  
+ *  @param $matches matches
+ *  @return string
+ */
+function _compres_css_protect($m)
+{
+	$out = $m[2];
+
+	$out = str_replace("\r", '', $out); // windows
+	$out = str_replace(["\n", "\t", '  ', '   ', '    '], '', $out);
+	$out = str_replace('; ', ';', $out);
+	$out = str_replace(';}', '}', $out);
+	$out = str_replace(': ', ':', $out);
+	$out = str_replace('{ ', '{', $out);
+	$out = str_replace(' }', '}', $out);
+	$out = str_replace(' {', '{', $out);
+	$out = str_replace('} ', '}', $out);
+
+	return $m[1] . '[html_base64]' . base64_encode($out) . '[/html_base64]' . $m[3];
 }
 
 # end of file
