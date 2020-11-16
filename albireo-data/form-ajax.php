@@ -3,7 +3,7 @@
 
 slug: form
 method: AJAX
-layout: empty
+layout: empty.php
 slug-static: -
 
 **/
