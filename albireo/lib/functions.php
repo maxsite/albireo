@@ -23,7 +23,7 @@ function getKeysPageData($key = 'meta', $format = '<meta property="[key]" conten
     // проходимся по данным страницы
     foreach ($pageData as $k => $v) {
         // ищем шаблон поиска в ключе массива
-        if (preg_match('!' . $key . '\[(.*?)\]!is', $k, $m)) {
+        if (preg_match('!^' . $key . '\[(.*?)\]$!is', $k, $m)) {
             // есть совпадение
 
             // если указан выходной html-формат, то используем его
