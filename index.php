@@ -1,4 +1,5 @@
 <?php
+
 /**
  * (c) Albireo Framework, https://maxsite.org/albireo, 2020
  */
@@ -28,6 +29,7 @@ if (!defined('SITE_URL')) define('SITE_URL', SITE_PROTOCOL . '://' . SITE_HOST .
 if (!defined('SYS_DIR')) define('SYS_DIR', BASE_DIR . 'albireo' . DIRECTORY_SEPARATOR);
 if (!defined('CACHE_DIR')) define('CACHE_DIR', SYS_DIR . 'cache' . DIRECTORY_SEPARATOR);
 if (!defined('DATA_DIR')) define('DATA_DIR', BASE_DIR . 'albireo-data' . DIRECTORY_SEPARATOR);
+if (!defined('DATA_URL')) define('DATA_URL', SITE_URL . 'albireo-data/');
 if (!defined('CONFIG_DIR')) define('CONFIG_DIR', DATA_DIR . 'config' . DIRECTORY_SEPARATOR);
 if (!defined('LAYOUT_DIR')) define('LAYOUT_DIR', DATA_DIR . 'layout' . DIRECTORY_SEPARATOR);
 if (!defined('SNIPPETS_DIR')) define('SNIPPETS_DIR', DATA_DIR . 'snippets' . DIRECTORY_SEPARATOR);
