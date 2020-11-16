@@ -74,6 +74,20 @@ function snippet(string $snippet)
 }
 
 /**
+ * Функция подключает файл и получает его результат
+ * используется для изоляции файла от остальных функций
+*/
+function _getContentFile($fn) {
+    ob_start(); // включаем буферизацию
+    require $fn; // подключаем файл
+    $content = ob_get_contents(); // забрали результат
+    
+    if (ob_get_length()) ob_end_clean(); // очистили буфер
+
+    return $content;
+}
+
+/**
  * Вывод страницы
  */
 function pageOut()
@@ -109,11 +123,8 @@ function pageOut()
             require DATA_DIR . $pageData['init-file'];
         }
 
-        ob_start(); // включаем буферизацию
-        require $mainFile; // подключаем шаблон
-        $content = ob_get_contents(); // забрали результат
-
-        if (ob_get_length()) ob_end_clean(); // очистили буфер
+        // файл подключаем отдельно, чтобы его изолировать от текущей функции
+        $content = _getContentFile($mainFile);
 
         // если указан парсер
         // чтобы отключить парсер можно указать «-» (минус)
