@@ -9,14 +9,16 @@
  *   key[index2]: val
  *
  * @param $key — искомый ключ
- * @param $format — html-формат вывода, где используются [key] и [val]
+ * @param $format — html-формат вывода [key] и [val]. Если = false, то отдаётся массив данных
+ * @param $pageData — данные страницы. Если файле, то получаем автоматом из текущей
  * @return array
  */
-function getKeysPageData($key = 'meta', $format = '<meta property="[key]" content="[val]">')
+function getKeysPageData($key = 'meta', $format = '<meta property="[key]" content="[val]">', $pageData = false)
 {
     $out = []; // выходной массив
 
-    $pageData = getVal('pageData'); // данные страницы
+    // если нет $pageData, то получаем данные из текущей страницы
+    if ($pageData === false) $pageData = getVal('pageData'); // данные страницы
 
     // проходимся по данным страницы
     foreach ($pageData as $k => $v) {
@@ -102,7 +104,6 @@ function pageOut()
 
     // если файл есть
     if ($mainFile and file_exists($mainFile)) {
-
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
         if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
             require DATA_DIR . $pageData['init-file'];
