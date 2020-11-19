@@ -3,6 +3,7 @@
 
 layout: empty.php
 slug: sitemap.xml
+slug-static: -
 compress: 0
 parser: -
 sitemap: -

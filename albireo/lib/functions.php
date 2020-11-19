@@ -74,14 +74,15 @@ function snippet(string $snippet)
 }
 
 /**
- * Функция подключает файл и получает его результат
+ * Вспомогательная функция подключает файл и получает его результат
  * используется для изоляции файла от остальных функций
-*/
-function _getContentFile($fn) {
+ */
+function _getContentFile($fn)
+{
     ob_start(); // включаем буферизацию
     require $fn; // подключаем файл
     $content = ob_get_contents(); // забрали результат
-    
+
     if (ob_get_length()) ob_end_clean(); // очистили буфер
 
     return $content;
@@ -120,7 +121,7 @@ function pageOut()
     if ($mainFile and file_exists($mainFile)) {
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
         if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
-            require DATA_DIR . $pageData['init-file'];
+            require_once DATA_DIR . $pageData['init-file'];
         }
 
         // файл подключаем отдельно, чтобы его изолировать от текущей функции
@@ -339,7 +340,6 @@ function readPages()
     // смотрим кэш, если есть, отдаем из него
     if ($cache = getCache('pagesinfo.txt')) {
         setVal('pagesInfo', $cache); // сохраняем массив в хранилище
-
         return; // и выходим
     }
 
@@ -350,10 +350,15 @@ function readPages()
     $pages = [];
 
     if (is_dir(DATA_DIR . 'pages')) {
+
+        // сортировка по каталогам, а потом по файлам
+        // используется свой вспомогательный класс PageSortedIterator
         $directory = new \RecursiveDirectoryIterator(DATA_DIR . 'pages');
         $iterator = new \RecursiveIteratorIterator($directory);
+        $sit = new \PageSortedIterator($iterator);
 
-        foreach ($iterator as $info) {
+        foreach ($sit as $info) {
+            // добавляем только php-файлы
             if ($info->isFile() and $info->getExtension() == 'php') $pages[] = $info->getPathname();
         }
     }
@@ -440,8 +445,37 @@ function readPages()
 
     // сохраняем данные в кэше — файл pagesinfo.txt
     // данные серилизуем
-    file_put_contents(CACHE_DIR . 'pagesinfo.txt', serialize($pagesInfo));
+
+    setCache('pagesinfo.txt', $pagesInfo);
 }
+
+/**
+ * Вспомогательный класс для сортировки в readPages()
+ */
+class PageSortedIterator extends SplHeap
+{
+    public function __construct(Iterator $iterator)
+    {
+        foreach ($iterator as $item) {
+            $this->insert($item);
+        }
+    }
+    public function compare($b, $a)
+    {
+        return strcmp($a->getRealpath(), $b->getRealpath());
+    }
+}
+
+/**
+ * Записать данные в файловый кэш
+ * @param $file - файл (имя относительно каталога CACHE_DIR)
+ * @param $data - произвольные данный
+ **/
+function setCache(string $file, $data)
+{
+    file_put_contents(CACHE_DIR . $file, serialize($data));
+}
+
 
 /**
  * Получить данные из кэша
@@ -456,35 +490,45 @@ function getCache(string $file)
     if (file_exists(CACHE_DIR . $file)) {
         // проверим не устарел ли кэш
 
-        // смотрим время текущего файла
-        $timeCache = filemtime(CACHE_DIR . $file);
-
-        // и время всех файлов в каталоге albireo-data
-        $allFiles = [];
+        // смотрим «снимок» каталога DATA_DIR
+        // это позволяет отслеживать все изменения
+        $snapshot = ''; // текущий «снимок»
 
         // рекурсивно обходим каталог DATA_DIR
         $directory = new \RecursiveDirectoryIterator(DATA_DIR);
         $iterator = new \RecursiveIteratorIterator($directory);
 
         foreach ($iterator as $info) {
-            // добавляем только если это файл
-            if ($info->isFile()) $allFiles[] = $info->getPathname();
+            // в «снимок» идут имена файлов и их даты
+            $snapshot .= $info->getPathname() . $info->getMTime();
         }
 
-        // находим самый новый файл
-        $timeLastModified = 0;
+        // сравниваем старый (из кэша) и новый «снимки»
+        
+        // получаем CRC32 полином
+        $snapshot = crc32($snapshot);
 
-        foreach ($allFiles as $f) {
-            $t = filemtime($f); // время модификации файла
+        // старый берём из файла кэша
+        if (file_exists(CACHE_DIR . 'snapshot.txt')) {
+            // загрузили содержимое
+            $snapshotOld = file_get_contents(CACHE_DIR . 'snapshot.txt');
 
-            // если этот файл новее, то обновляем $timeLastModified
-            if ($t > $timeLastModified) $timeLastModified = $t;
+            // обратная серилизация с @подавлением ошибок
+            $snapshotOld = @unserialize($snapshotOld);
+        } else {
+            $snapshotOld = 0;
         }
 
-        // если кэш оказался старее, то отмечаем его невалидным
-        if ($timeLastModified > $timeCache) return false;
+        // если они не равны, то кэш невалидный
+        if ($snapshot != $snapshotOld) {
+            // сохраняем в кэше новый
+            setCache('snapshot.txt', $snapshot);
 
-        // есть кэш, получаем из него данные
+            // кэш невалидный, выходим
+            return false;
+        }
+
+        // если всё, ок, то отдаём кэш из файла
         $content = file_get_contents(CACHE_DIR . $file); // загрузили содержимое
 
         // обратная серилизация с @подавлением ошибок
