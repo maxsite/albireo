@@ -22,7 +22,7 @@ $username = $_SESSION['username'] ?? '';
 
 if ($password and $username) {
     // уже есть — выходим, для выхода нужно нажать ссылку logout
-    echo 'Already username';
+    echo '<div class="t-center pad30 b-center w300px bg-white mar50-t">Already username. <a href="' . SITE_URL . 'admin/logout">Logout</a></div>';
     return;
 }
 

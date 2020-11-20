@@ -32,6 +32,8 @@ $command = $command0 = $file;
 $command = str_replace('\\', '/', $command); // замены для windows
 $command = str_replace(['<', '>', ':', '"',  '|', '?', '*'], '-', $command); // недопустимые символы
 $command = str_replace('//', '/', $command); // двойные слэши
+$command = str_replace('../', '', $command);
+$command = str_replace('./', '', $command);
 $command = trim($command, '/'); // удалим крайние слэши
 
 if ($command0 !== $command) {
@@ -65,5 +67,5 @@ slug:
 
     $edit = SITE_URL . 'admin/edit/' . encodeURL64(str_replace(DATA_DIR, '', $fn));
 
-    echo '<div class="pad10 bg-green100 t-green600 bor-green bor1 bor-solid mar30-b rounded10"><i class="im-info-circle"></i>OK! File ' . $fn . ' create! <a href="' . $edit  . '">Edit file</a></div>';
+    echo '<div class="pad10 bg-green100 t-green600 bor-green bor1 bor-solid mar30-b rounded10"><i class="im-info-circle"></i>OK! File <b>' . str_replace(DATA_DIR, '', $fn) . '</b> create! <a href="' . $edit  . '">Edit file</a></div>';
 }

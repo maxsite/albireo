@@ -26,8 +26,8 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
     service_files(CONFIG_DIR, '<h4>Config</h4>');
     service_files(LAYOUT_DIR, '<h4 class="mar30-t">Layout</h4>');
     service_files(SNIPPETS_DIR, '<h4 class="mar30-t">Snippets</h4>');
-    service_files(ADMIN_DIR . 'config/', '<h4 class="mar30-t">Admin</h4>', 2);
-    service_files(DATA_DIR . 'backup/', '<h4 class="mar30-t">Backup</h4>');
+    service_files(ADMIN_DIR . 'config' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Admin</h4>', 0, false);
+    service_files(DATA_DIR . 'backup' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Backup</h4>');
     service_files(DATA_DIR, '<h4 class="mar30-t">Other</h4>', 2);
 
     ?>
@@ -38,7 +38,7 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
 /**
  * Вывод файлов из каталога
  */
-function service_files($dir, $header = '', $mode = 1)
+function service_files($dir, $header = '', $mode = 1, $noAdmin = true)
 {
     $files = [];
 
@@ -49,8 +49,12 @@ function service_files($dir, $header = '', $mode = 1)
         foreach ($iterator as $info) {
             if ($info->isFile()) {
                 // исключить pages/admin
-                if (strpos($info->getPathname(), DATA_DIR . 'pages' . DIRECTORY_SEPARATOR  . 'admin' . DIRECTORY_SEPARATOR) === FALSE)
-                    $files[] = $info->getPathname();
+                if ($noAdmin) {
+					if (strpos($info->getPathname(), DATA_DIR . 'pages' . DIRECTORY_SEPARATOR  . 'admin' . DIRECTORY_SEPARATOR) === FALSE)
+						$files[] = $info->getPathname();
+                } else {
+					$files[] = $info->getPathname();
+                }
             }
         }
 

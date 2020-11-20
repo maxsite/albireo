@@ -27,14 +27,13 @@ $pagesInfo = array_filter($pagesInfo, function($val, $key){
 $lastFile = [];
 
 foreach ($pagesInfo as $file => $info) {
-    // исключим админку
-    if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR  . 'admin' . DIRECTORY_SEPARATOR) === FALSE) {
-        $t= filemtime($file);
+	$t = $t1 = filemtime($file);
 
-        $lastFile[$t] = $info;
-        $lastFile[$t]['__file_name'] = str_replace(DATA_DIR, '', $file);
-        $lastFile[$t]['__file_time'] = $t;
-    }
+	$t .= '-' . $file;
+	
+	$lastFile[$t] = $info;
+	$lastFile[$t]['__file_name'] = str_replace(DATA_DIR, '', $file);
+	$lastFile[$t]['__file_time'] = $t1;
 }
 
 krsort($lastFile);
@@ -82,12 +81,12 @@ if ($userNik) $userNik = ' ' . htmlspecialchars($userNik);
 
         foreach ($lastFile as $info) {
             $editUrl = SITE_URL . 'admin/edit/' . encodeURL64($info['__file_name']);
-            $pageUrl = SITE_URL . $info['slug'];
+            $pageUrl = rtrim(SITE_URL . $info['slug'], '/');
             $title = $info['title'] ?? '! no title';
 
             $mod = date('Y-m-d H:i', $info['__file_time']);
 
-            echo '<li><a class="im-edit" href="' . $editUrl . '"></a> <a href="' . $pageUrl . '">' . str_replace('\\', '/', $info['__file_name']) . '</a> → <span class="t-bold">' . htmlspecialchars($title) . '</span> <span class="t80 t-bold t-gray500">' . $mod . '</span></li>';
+            echo '<li><a class="im-external-link-alt" href="' . $pageUrl . '"></a> <a href="' . $editUrl . '">' . str_replace('\\', '/', $info['__file_name']) . '</a> → <span class="t-bold">' . htmlspecialchars($title) . '</span> <span class="t80 t-bold t-gray500">' . $mod . '</span></li>';
         }
 
     ?>

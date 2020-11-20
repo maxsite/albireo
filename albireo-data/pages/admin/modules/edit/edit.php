@@ -33,4 +33,4 @@ if ($segmentFile) {
     }
 }
 
-echo '<br><div class="pad10 bg-red100 t-red600 bor-red bor1 bor-solid mar30-b rounded10"><i class="im-exclamation-triangle"></i>ERROR! File not found</div>';
+echo '<br><div class="pad10 bg-red100 t-red600 bor-red bor1 bor-solid mar30 rounded10"><i class="im-exclamation-triangle"></i>ERROR! File not found</div>';
