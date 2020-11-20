@@ -3,7 +3,6 @@
 
 layout: empty.php
 slug: sitemap.xml
-slug-static: -
 compress: 0
 parser: -
 sitemap: -
@@ -35,6 +34,9 @@ foreach($pagesInfo as $file => $info) {
 	if ($slug == '404') continue; // исключить 404
 	if (isset($info['method']) and strtoupper($info['method']) !== 'GET') continue;
 	if (isset($info['sitemap']) and $info['sitemap'] == '-') continue;
+	
+	// исключить pages/admin
+	if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR  . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) continue;
 	
 	$changefreq = $info['sitemap-changefreq'] ?? $changefreqDef;
 	$priority = $info['sitemap-priority'] ?? $priorityDef;
