@@ -7,12 +7,19 @@ $content = htmlspecialchars($content);
 $urlAjaxDelete = SITE_URL . 'admin/delete-file';
 $urlRedirect =  SITE_URL . 'admin/pages';
 
+// адрес страницы на сайте
+$previewLink = '';
+$pagesInfo = getVal('pagesInfo');
+$keyFile = $pagesInfo[DATA_DIR . $fileEdit] ?? '';
+
+if ($keyFile) $previewLink = '<a class="im-external-link-alt t100 t-gray600" href="' . rtrim(SITE_URL . $keyFile['slug'], '/') . '" target="_blank"></a>';
+
 // дальше «резиновая разметка, чтобы textarea занимала всю полезную площадь
 
 ?>
 <div class="h100vh-min flex flex-column">
     <div class="flex-grow0 flex flex-vcenter pad20-tb bg-yellow250 pad30-rl">
-        <h1 class="flex-grow5 h3 mar0"><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup></h1>
+        <h1 class="flex-grow5 h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup></h1>
         <div class="im-times cursor-pointer hover-t-red600" onclick="deleteFile('<?= $segmentFile ?>')">Delete file</div>
     </div>
 
@@ -87,5 +94,4 @@ $urlRedirect =  SITE_URL . 'admin/pages';
             }
         }
     );
-
 </script>
