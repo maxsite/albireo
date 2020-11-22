@@ -38,13 +38,22 @@ require_once __DIR__ . '/_functions.php';
                 <!-- <span class="b-inline t-cyan600 animation-zoom animation-infinite animation-slow pos-relative" style="font-size: .4rem; top: -15px;">✸</span><span class="b-inline t-yellow600 animation-fade animation-infinite animation-slow animation-delay1s pos-relative" style="font-size: .6rem; top: -10px">✸</span>--></a>
         </header>
 
-        <nav class="pad15-rl">
-            <div class="t90 mar20-b mar10-t t-teal100 links-no-color t-center">
+        <nav>
+            <div class="pad15-rl t90 mar20-b mar10-t t-teal100 links-no-color t-center">
                 <a href="<?= SITE_URL ?>" title="">Home</a>
                 &bullet; <a href="<?= SITE_URL ?>admin/logout" title="">Exit<i class="mar10-l im-sign-out-alt"></i></a>
             </div>
+
             <?php
-            require __DIR__ . '/_menu.php';
+            if (file_exists(ADMIN_DIR . '/config/_menu-before.php')) require ADMIN_DIR . '/config/_menu-before.php';
+            ?>
+
+            <div class="pad15-rl">
+                <?php require __DIR__ . '/_menu.php'; ?>
+            </div>
+
+            <?php
+            if (file_exists(ADMIN_DIR . '/config/_menu-after.php')) require ADMIN_DIR . '/config/_menu-after.php';
             ?>
         </nav>
 
