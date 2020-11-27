@@ -1,12 +1,12 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 /*
-    (с) Landing Page Framework (LPF)
-    (c) MAX — http://lpf.maxsite.com.ua/
+    (с) Albireo Framework
+    (c) MAX — https://maxsite.org/albireo
     (c) MaxSite CMS — https://max-3000.com/
     
     См. https://max-3000.com/book/simple
     
-    Версия: 2020-02-04
+    Версия: 2020-27-11
     
     Возможности
     -----------
@@ -92,6 +92,41 @@
     /div || /div
     
     <!-- nosimple --> текст без обработки <!-- /nosimple -->
+    
+    
+    Если требуется автоматом расставить тэги <P> для каждой новой строки.
+
+    Пример 1:
+    [psimple]
+    Hello 1
+    Hello 2
+    Hello 3
+    [/psimple]
+    
+    Результат:
+    
+    <p>Hello 1</p>
+    <p>Hello 2</p>
+    <p>Hello 3</p>
+    
+    Пример 2:
+    [psimple]
+    Hello 1
+    Hello 2
+    <hr>
+    __ Hello 3
+    _ Hello 4
+    Hello 5
+    [/psimple]
+    
+    Результат:
+    <p>Hello 1</p>
+    <p>Hello 2</p>
+    <hr>
+    <div>Hello 3</div>
+    <p>Hello 4</p>
+    <p>Hello 5</p>
+
 */
 
 function simple($text)
@@ -178,6 +213,11 @@ function simple($text)
     $text = str_replace('[br left]', '<br style="clear:left">', $text);
     $text = str_replace('[br right]', '<br style="clear:right">', $text);
 
+    // [psimple] ... [/psimple] — авторасстановка <p> для всех \n внутри блока 
+    $text = preg_replace_callback('!(\[psimple\])(.*?)(\[/psimple\])!is', function ($m) {        
+        return preg_replace('~(^\s*)(?!\s*<)(.+)\n~m', "<p>$2</p>\n", $m[2]);
+    }, $text);
+    
     $text = preg_replace_callback('!\[simple_base64\](.*?)\[\/simple_base64\]!is', function ($m) {
         return base64_decode($m[1]);
     }, $text);
