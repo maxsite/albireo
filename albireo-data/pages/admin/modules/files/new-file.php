@@ -27,7 +27,14 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
             <input class="form-input w100" type="text" name="file" placeholder="new file..." required>
         </div>
 
-        <button class="mar10-l button button1 pad5-tb pad20-rl im-plus" type="submit">Create</button>
+        <div class="pad10-l">
+            <button class="button button1 pad5-tb pad20-rl im-plus" type="submit">Create</button>
+
+            <label class="form-checkbox mar20-l" title="Create a file in the pages directory">
+                <input type="checkbox" name="inpages" value="1">
+                <span class="form-checkbox-icon mar10-r bg-blue100"></span><i>pages</i>
+            </label>
+        </div>
     </form>
     <div class="t-gray600 t90 mar10-tb">
         For example: <i class="t-primary600">about</i> or <i class="t-primary600">about.php</i>, <i class="t-primary600">pages/map.php</i>

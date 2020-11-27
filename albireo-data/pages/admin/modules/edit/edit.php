@@ -10,6 +10,8 @@ layout: pages/admin/core/_layout.php
 parser: -
 protect-pre: 0
 compress: 0
+head[1]: <style>[x-cloak]{display: none}</style>
+head[2]: <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
 
  **/
 

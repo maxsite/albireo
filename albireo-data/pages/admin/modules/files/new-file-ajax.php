@@ -40,7 +40,14 @@ if ($command0 !== $command) {
     exit('<div class="pad10 bg-red100 t-red600 bor-red bor1 bor-solid mar30-b rounded10"><i class="im-exclamation-triangle"></i>ERROR! File ' . $command0 . ' incorrect. Enter a new file name</div>');
 }
 
-$fn = DATA_DIR . $command . '.php'; // можно указывать файл без расширения .php
+$inpages = $_POST['inpages'] ?? false;
+
+if ($inpages)
+    $dirFile = DATA_DIR . 'pages' . DIRECTORY_SEPARATOR;
+else
+    $dirFile = DATA_DIR;
+
+$fn = $dirFile . $command . '.php'; // можно указывать файл без расширения .php
 $fn = str_replace('.php.php', '.php', $fn); // а если указано, то исправляем
 
 if (file_exists($fn)) {
