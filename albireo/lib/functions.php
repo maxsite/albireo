@@ -66,9 +66,11 @@ function deleteDir(string $dir)
 /**
  * Вывести сниппет
  * @param $snippet - имя сниппета
+ * @param $data - произвольные данные, которые будут доступны в файле сниппета
  * snippet('twitter'); // выведет файл albireo-data/snippets/twitter.php
+ * snippet('nextprev', ['page4', 'page6']);
  */
-function snippet(string $snippet)
+function snippet(string $snippet, $data = '')
 {
     if (file_exists(SNIPPETS_DIR . $snippet . '.php')) require SNIPPETS_DIR . $snippet . '.php';
 }
