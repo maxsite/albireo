@@ -5,18 +5,22 @@ $menuEl = []; // массив данных меню
 // проходимся по всем страницам
 foreach (getVal('pagesInfo') as $file => $pageData) {
 
-    // берём те, у которых есть параметр «menu»
-    if ($m = getKeysPageData('menu', '', $pageData)) {
+    // только страницы в каталоге админ-панели
+    if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) {
 
-        // если не указан menu[title] не выводим в меню
-        if (!$title = $m['title'] ?? '') continue;
+        // берём те, у которых есть параметр «menu»
+        if ($m = getKeysPageData('menu', '', $pageData)) {
 
-        $group =  $m['group'] ?? 'General';
-        $slug = $m['slug'] ?? $pageData['slug'];
-        $order = $m['order'] ?? '10';
+            // если не указан menu[title] не выводим в меню
+            if (!$title = $m['title'] ?? '') continue;
 
-        // добавляем order для последующей сортировки
-        $menuEl[$group][$order . '@' . $slug] = $title;
+            $group =  $m['group'] ?? 'General';
+            $slug = $m['slug'] ?? $pageData['slug'];
+            $order = $m['order'] ?? '10';
+
+            // добавляем order для последующей сортировки
+            $menuEl[$group][$order . '@' . $slug] = $title;
+        }
     }
 }
 
