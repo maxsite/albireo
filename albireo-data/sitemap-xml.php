@@ -3,6 +3,7 @@
 
 layout: empty.php
 slug: sitemap.xml
+slug-static: sitemap.xml
 compress: 0
 parser: -
 sitemap: -
@@ -51,7 +52,7 @@ foreach($pagesInfo as $file => $info) {
 	$out .= '</url>' . "\n";
 }
 
-header('Content-Type: application/xml; charset=utf-8');
+@header('Content-Type: application/xml; charset=utf-8');
 
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
