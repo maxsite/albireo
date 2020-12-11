@@ -20,12 +20,21 @@ $buttons = '';
 if (file_exists(ADMIN_DIR . '/config/_admin.php')) {
     $configAdmin = require ADMIN_DIR . '/config/_admin.php';
     $editorButton = $configAdmin['editorButton'] ?? [];
-
+    $editorButtonMode = $configAdmin['editorButtonMode'] ?? 'click';
+    
+    if ($editorButtonMode == 'hover') {
+        $addMode1 = '@mouseover="open = true" @mouseout="open = false" @click="open = true"';
+        $addMode2 = '@mouseover="open = true" @mouseout="open = false"';
+    } else {
+        $addMode1 = '@click="open = true"';
+        $addMode2 = '';
+    }
+    
     // используется Alpine.js
     foreach ($editorButton as $name => $group) {
         $buttons .= '<div x-data="{open: false}" class="pos-relative b-inline">';
-        $buttons .= '<button @click="open = true" :class="{\'bg-teal500\': open}" class="button mar5-r hover-bg-teal500">' . $name . '</button>';
-        $buttons .= '<div x-show="open" @click.away="open = false" @click="open = false" class="animation-fade bordered pos-absolute w100px-min z-index1 bg-white b-shadow-var" x-cloak>';
+        $buttons .= '<button ' . $addMode1 . ' :class="{\'bg-teal500\': open}" class="button mar5-r hover-bg-teal500">' . $name . '</button>';
+        $buttons .= '<div x-show="open" ' . $addMode2 . ' @click.away="open = false" @click="open = false" class="animation-fade bordered pos-absolute w100px-min z-index1 bg-white b-shadow-var" x-cloak>';
 
         foreach ($group as $button) {
             $title = $button[3] ?? '';

@@ -5,6 +5,9 @@ return [
     // каталоги указываются относительно DATA_DIR
     'serviceDirs' => ['lib'],
 
+    // режим работы кнопок текстового редактора — по клику или при наведении мыши
+    'editorButtonMode' => 'hover', // click or hover
+    
     // кнопки к текстовому редактору
     // Оформляются в виде групп, где название группы — пункт кнопки dropdown
     // каждая кнопка — этом массив из 3-х элементов: Название, вставка до, вставка после курсора
@@ -12,7 +15,6 @@ return [
     // если первый элемент равен «-» то это добавляет отступ между кнопками (<hr>)
     // Кавычки нужно заменять на &quot; Перенос строки это \\n
     // После вставки в textatea не работает Отмена (Ctrl+Z) — это стандартное поведение браузера
-    
     'editorButton' => [
 
         'Format' => [
@@ -22,7 +24,7 @@ return [
             ['S', '<s>', '</s>'],
             ['-'],
             ['A', '<a href=&quot;&quot;>', '</a>'],
-            ['IMG', '<img src=&quot;&quot; width=&quot;&quot; height=&quot;&quot; alt=&quot;&quot; title=&quot;&quot;>', ''],
+            ['IMG', '<img src=&quot;', '&quot; width=&quot;&quot; height=&quot;&quot; alt=&quot;&quot; title=&quot;&quot;>'],
             ['-'],
             ['UL', '<ul>\\n', '\\n</ul>\\n'],
             ['LI', '<li>', '</li>'],
@@ -50,34 +52,34 @@ return [
             ['SPAN', '<span class=&quot;&quot;>', '</span>'],
             ['BLOCKQUOTE', '<blockquote>', '</blockquote>'],
             ['-'],
-            ['&lt;!-- --&gt;', '<!-- ', ' -->'],
+            ['<span class="t-mono">&lt;!-- --&gt;</span>', '<!-- ', ' -->'],
         ],
 
         // https://max-3000.com/book/simple
         'Simple' => [
-            ['B', '*', '*'],
-            ['I', '_', '_'],
-            ['CODE', '@', '@'],
+            ['b', '*', '*'],
+            ['i', '_', '_'],
+            ['code', '@', '@'],
             ['-'],
-            ['H1', 'h1 ', ''],
-            ['H2', 'h2 ', ''],
-            ['H3', 'h3 ', ''],
-            ['H4', 'h4 ', ''],
-            ['H5', 'h5 ', ''],
-            ['H6', 'h6 ', ''],
+            ['h1', 'h1 ', ''],
+            ['h2', 'h2 ', ''],
+            ['h3', 'h3 ', ''],
+            ['h4', 'h4 ', ''],
+            ['h5', 'h5 ', ''],
+            ['h6', 'h6 ', ''],
             ['-'],
-            ['UL', 'ul\\n', '\\n/ul\\n'],
-            ['LI', '* ', ''],
+            ['ul', 'ul\\n', '\\n/ul\\n'],
+            ['li', '* ', ''],
             ['-'],
-            ['HR', 'hr', ''],
+            ['hr', 'hr', ''],
             ['-'],
-            ['psimple', '[psimple]\\n', '\\n[/psimple]'],
-            ['P', '_ ', ''],
-            ['DIV (line)', '__ ', ''],
-            ['DIV', 'div()\\n', '\\n/div'],
-            ['PRE', 'pre\\n', '\\n/pre'],
-            ['BQQ (line)', 'bqq ', '', 'blockquote'],
-            ['BQ', 'bq\\n', '\\n/bq', 'blockquote'],
+            ['[psimple]', '[psimple]\\n', '\\n[/psimple]'],
+            ['p', '_ ', ''],
+            ['div (line)', '__ ', ''],
+            ['div', 'div()\\n', '\\n/div'],
+            ['pre', 'pre\\n', '\\n/pre'],
+            ['bqq (line)', 'bqq ', '', 'blockquote'],
+            ['bq', 'bq\\n', '\\n/bq', 'blockquote'],
             ['-'],
             ['nosimple', '<!-- nosimple -->', '<!-- /nosimple -->', 'NoSimple'],
         ],
