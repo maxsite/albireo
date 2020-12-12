@@ -43,7 +43,7 @@ function getSessionId()
 }
 
 /**
- * Проверяет пользователя на разрешения
+ * Проверяет пользователя на разрешения и делает редирект
  * Если их нет, то редиректит на страницу login или access-denied  
  * @param  string|array $levels - уровни доступа
  * @param $message - сообщение для страницы access-denied
@@ -62,6 +62,20 @@ function verifyLoginRedirect($level, string $message)
         header('Location:' . SITE_URL . 'admin/access-denied');
         return;
     }
+}
+
+/**
+ * Проверяет пользователя на разрешения и возвращает true или false
+ * @param  string|array $levels - уровни доступа
+ **/
+function verifyLogin($level)
+{
+    if (!$user = getUser()) return false;
+
+    // проверяем разрешение на доступ
+    if (!checkUserAccess($user, $level)) return false;
+    
+    return true;
 }
 
 /**

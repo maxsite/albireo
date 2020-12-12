@@ -14,7 +14,9 @@ init-file: pages/admin/core/_functions.php
 
 **/
 
- // отсекаем всё, что без заголовка AJAX
+if (!verifyLogin(['admin'])) exit('Access is denied');
+
+// отсекаем всё, что без заголовка AJAX
 if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) exit('Error: AJAX only!');
 
 // нужные данные в POST

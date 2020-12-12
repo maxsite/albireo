@@ -44,7 +44,9 @@ foreach ($pagesInfo as  $file => $info) {
         $oldDir = $newDir;
     }
 
-    $title = (isset($info['title']) and $info['title']) ? htmlspecialchars($info['title']) : '<span class="t-red700">! No title</span>';
+    // $title = (isset($info['title']) and $info['title']) ? htmlspecialchars($info['title']) : '<span class="t-red700">! No title</span>';
+    
+    $title = (isset($info['title']) and $info['title']) ? htmlspecialchars($info['title']) : '<span class="t-red700">' . $file1 . ' - no title</span>';
 
     $url = SITE_URL . $info['slug'];
     $editUrl = SITE_URL . 'admin/edit/' . encodeURL64($file1); // файл кодиуется в base64

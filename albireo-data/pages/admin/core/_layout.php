@@ -22,6 +22,20 @@ require_once __DIR__ . '/_functions.php';
         h2 {
             margin-top: 40px;
         }
+        #myNav::-webkit-scrollbar {
+            width: 14px; 
+            height: 14px;
+            background-color: #185B56;
+        }
+        
+        #myNav::-webkit-scrollbar-thumb {
+            background-color: #1F736B;
+            border-radius: 14px;
+        }
+
+        #myNav::-webkit-scrollbar-thumb:hover {
+            background-color: #217b72;
+        }
     </style>
     <?= implode('', getKeysPageData('head', '[val]')) ?>
     <!-- /nosimple -->

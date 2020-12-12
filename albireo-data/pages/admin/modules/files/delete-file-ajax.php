@@ -12,7 +12,9 @@ compress: 0
 protect-pre: 0
 init-file: pages/admin/core/_functions.php
 
- **/
+**/
+
+if (!verifyLogin(['admin'])) exit('Access is denied');
 
 // отсекаем всё, что без заголовка AJAX
 if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) exit('Error: AJAX only!');
