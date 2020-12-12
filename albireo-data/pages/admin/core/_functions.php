@@ -111,7 +111,11 @@ function checkUserAccess(array $user, $level)
 function checkUser(string $username, string $password)
 {
     // загружаем список юзеров
-    if (file_exists(ADMIN_DIR . '/config/_users.php'))
+    // либо в общем каталоге CONFIG_DIR/users.php — приоритетный вариант
+    // он может быть в  ADMIN_DIR/config/_users.php — дополнительный вариант
+    if (file_exists(CONFIG_DIR . 'users.php'))
+        $users = require CONFIG_DIR . 'users.php';
+    elseif (file_exists(ADMIN_DIR . '/config/_users.php'))
         $users = require ADMIN_DIR . '/config/_users.php';
     else
         return false;
