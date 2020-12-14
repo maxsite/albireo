@@ -2,9 +2,9 @@
 
 PHP-фрейморк для создания Landing pages, статичных сайтов, примеров кода, изучения и т.д. Используйте Albireo для создания документации вашего проекта. Может рассматриваться как учебный проект для студентов изучающих PHP. Есть админ-панель.
 
-Описание: https://maxsite.org/albireo
-Пример страницы документации: https://maxsite.org/albireo/doc
-Демо-доступ к админ-панели: https://maxsite.org/albireo/admin (логин: demo пароль: demodemo)
+* Описание: https://maxsite.org/albireo
+* Пример страницы документации: https://maxsite.org/albireo/doc
+* Демо-доступ к админ-панели: https://maxsite.org/albireo/admin (логин: demo пароль: demodemo)
 
 ## Быстрый старт
 
