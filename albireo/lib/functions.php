@@ -4,6 +4,25 @@
  */
 
 /**
+ * Получить данные из файла конфигурации
+ * @param $file - файл
+ * @param $key - если указан ключ, то возвращаем его массив
+ */
+function getConfigFile(string $file, $key = '')
+{
+    if (file_exists($file)) {
+        $config = require $file;
+
+        if ($key)
+            return $config[$key] ?? [];
+        else
+            return $config;
+    } else {
+        return [];
+    }
+}
+
+/**
  * Получить из pageData ключи вида
  *   key[index1]: val
  *   key[index2]: val
@@ -506,7 +525,7 @@ function getCache(string $file)
         }
 
         // сравниваем старый (из кэша) и новый «снимки»
-        
+
         // получаем CRC32 полином
         $snapshot = crc32($snapshot);
 

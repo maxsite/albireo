@@ -17,8 +17,9 @@ if ($keyFile) $previewLink = '<a class="im-external-link-alt t100 t-gray600" hre
 // кнопки к редактору
 $buttons = '';
 
-if (file_exists(ADMIN_DIR . '/config/_admin.php')) {
-    $configAdmin = require ADMIN_DIR . '/config/_admin.php';
+$configAdmin = getConfigAdmin();
+
+
     $editorButton = $configAdmin['editorButton'] ?? [];
     $editorButtonMode = $configAdmin['editorButtonMode'] ?? 'click';
     
@@ -49,7 +50,9 @@ if (file_exists(ADMIN_DIR . '/config/_admin.php')) {
 
         $buttons .= '</div></div>';
     }
-}
+
+$readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">read only</sup>';
+
 
 // дальше «резиновая разметка, чтобы textarea занимала всю полезную площадь
 
@@ -57,7 +60,7 @@ if (file_exists(ADMIN_DIR . '/config/_admin.php')) {
 
 <div class="h100vh-min flex flex-column">
     <div class="flex-grow0 flex flex-vcenter pad20-tb bg-yellow250 pad30-rl mar10-b">
-        <h1 class="flex-grow5 h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup></h1>
+        <h1 class="flex-grow5 h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup><?= $readOnly ?></h1>
         <div class="im-times cursor-pointer hover-t-red600" onclick="deleteFile('<?= $segmentFile ?>')">Delete file</div>
     </div>
 

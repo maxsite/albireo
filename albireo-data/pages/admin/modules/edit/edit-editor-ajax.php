@@ -12,7 +12,7 @@ protect-pre: 0
 compress: 0
 init-file: pages/admin/core/_functions.php
 
-**/
+ **/
 
 if (!verifyLogin(['admin'])) exit('Access is denied');
 
@@ -32,6 +32,6 @@ if (!$file) exit('ERROR! Incorrect file name');
 
 if (!file_exists(DATA_DIR . $file)) exit('ERROR! File not found');
 
-file_put_contents(DATA_DIR . $file, $content);
+if (verifyLogin(['admin-change-files'])) file_put_contents(DATA_DIR . $file, $content);
 
 echo '<span class="t-green700">OK! Saved in ' . date('H:i:s Y-m-d') . '</span>';

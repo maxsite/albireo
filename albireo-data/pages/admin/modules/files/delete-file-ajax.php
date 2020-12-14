@@ -12,7 +12,7 @@ compress: 0
 protect-pre: 0
 init-file: pages/admin/core/_functions.php
 
-**/
+ **/
 
 if (!verifyLogin(['admin'])) exit('Access is denied');
 
@@ -30,20 +30,25 @@ if (!$file) exit('ERROR! Incorrect file name');
 
 if (!file_exists(DATA_DIR . $file)) exit('ERROR! File not found');
 
-// если есть каталог backup, то переместим его туда
-if (is_dir(DATA_DIR . 'backup') and strpos($file, DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR) === false)
-    copy(DATA_DIR . $file, DATA_DIR . 'backup' . DIRECTORY_SEPARATOR . basename($file));
+// для изменений нужен полный доступ
+if (verifyLogin(['admin-change-files'])) {
+    // если есть каталог backup, то переместим его туда
+    if (is_dir(DATA_DIR . 'backup') and strpos($file, DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR) === false)
+        copy(DATA_DIR . $file, DATA_DIR . 'backup' . DIRECTORY_SEPARATOR . basename($file));
 
-// удалить файл
-unlink(DATA_DIR . $file);
+    // удалить файл
+    unlink(DATA_DIR . $file);
 
-// удалить его каталог
-$dirForDelete = dirname(DATA_DIR . $file); // каталог файла
+    // удалить его каталог
+    $dirForDelete = dirname(DATA_DIR . $file); // каталог файла
 
-// если это каталог и он не backup
-if (is_dir($dirForDelete) and strpos($dirForDelete,  DIRECTORY_SEPARATOR . 'backup') === false) {
-    // если он пустой, то удаляем
-    if (!glob($dirForDelete . DIRECTORY_SEPARATOR . '*')) @rmdir($dirForDelete);
+    // если это каталог и он не backup
+    if (is_dir($dirForDelete) and strpos($dirForDelete,  DIRECTORY_SEPARATOR . 'backup') === false) {
+        // если он пустой, то удаляем
+        if (!glob($dirForDelete . DIRECTORY_SEPARATOR . '*')) @rmdir($dirForDelete);
+    }
 }
 
 echo '<span class="t-green700">OK! File deleted</span>';
+
+# end of file

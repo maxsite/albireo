@@ -1,7 +1,7 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 /**
  * Данные для бокового меню
- * Использутся в menu-manual.php
+ * Используется в menu-manual.php
  */
 
 // меню (файл/slug => название)

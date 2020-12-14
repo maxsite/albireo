@@ -15,10 +15,11 @@ compress: 1
  **/
 
 verifyLoginRedirect(['admin'], 'You do not have permission to access the admin panel!');
+$readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">read only</sup>';
 
 ?>
 
-<h1 class="pad20-tb bg-yellow250 pad30-rl">Add a new file</h1>
+<h1 class="pad20-tb bg-yellow250 pad30-rl">Add a new file<?= $readOnly ?></h1>
 
 <div class="pad30-rl pad10-rl-tablet">
     <form class="mar30-t b-flex flex-vcenter" onsubmit="sendAjax(this); return false;">

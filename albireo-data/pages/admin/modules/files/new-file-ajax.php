@@ -12,7 +12,7 @@ compress: 0
 protect-pre: 0
 init-file: pages/admin/core/_functions.php
 
-**/
+ **/
 
 if (!verifyLogin(['admin'])) exit('Access is denied');
 
@@ -60,10 +60,13 @@ if (file_exists($fn)) {
         $fn = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $fn);
         $path = pathinfo($fn);
 
-        if (!file_exists($path['dirname'])) mkdir($path['dirname'], 0777, true);
+        if (verifyLogin(['admin-change-files'])) {
+            if (!file_exists($path['dirname'])) mkdir($path['dirname'], 0777, true);
+        }
     }
-
-    file_put_contents($fn, '<?php if (!defined(\'BASE_DIR\')) exit(\'No direct script access allowed\');
+    
+    if (verifyLogin(['admin-change-files'])) {
+        file_put_contents($fn, '<?php if (!defined(\'BASE_DIR\')) exit(\'No direct script access allowed\');
 /**
 
 title: 
@@ -73,6 +76,7 @@ slug:
 **/
 ?>
 ');
+    }
 
     $edit = SITE_URL . 'admin/edit/' . encodeURL64(str_replace(DATA_DIR, '', $fn));
 

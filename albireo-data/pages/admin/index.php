@@ -61,6 +61,7 @@ if ($userNik) $userNik = ' ' . htmlspecialchars($userNik);
         div
             <a class="mar20-r im-book t-nowrap" href="https://maxsite.org/albireo" target="_blank">Albireo  (documentation)</a>
             <a class="mar20-r im-star t-nowrap" href="https://github.com/maxsite/albireo" target="_blank">Albireo on GitHub</a>
+            <a class="mar20-r im-comment-dots t-nowrap" href="https://github.com/maxsite/albireo/discussions" target="_blank">Discussions</a>
             <a class="mar20-r im-link t-nowrap" href="https://maxsite.org/" target="_blank">MaxSite.org</a>
         /div
         

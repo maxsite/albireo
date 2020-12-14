@@ -4,23 +4,22 @@ $menuEl = []; // массив данных меню
 
 // проходимся по всем страницам
 foreach (getVal('pagesInfo') as $file => $pageData) {
+    
+    // только файлы из админ-панели
+	if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR) === false) continue;
+    
+    // берём те, у которых есть параметр «menu»
+    if ($m = getKeysPageData('menu', '', $pageData)) {
 
-    // только страницы в каталоге админ-панели
-    if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) {
+        // если не указан menu[title] не выводим в меню
+        if (!$title = $m['title'] ?? '') continue;
 
-        // берём те, у которых есть параметр «menu»
-        if ($m = getKeysPageData('menu', '', $pageData)) {
+        $group =  $m['group'] ?? 'General';
+        $slug = $m['slug'] ?? $pageData['slug'];
+        $order = $m['order'] ?? '10';
 
-            // если не указан menu[title] не выводим в меню
-            if (!$title = $m['title'] ?? '') continue;
-
-            $group =  $m['group'] ?? 'General';
-            $slug = $m['slug'] ?? $pageData['slug'];
-            $order = $m['order'] ?? '10';
-
-            // добавляем order для последующей сортировки
-            $menuEl[$group][$order . '@' . $slug] = $title;
-        }
+        // добавляем order для последующей сортировки
+        $menuEl[$group][$order . '@' . $slug] = $title;
     }
 }
 
@@ -56,11 +55,14 @@ $file = getPageData('slug');
 if ($file == '/') $file = ':home'; // замена для главной
 
 foreach ($menuEl as $key => $e) {
-    echo '<h5 class="t-small-caps bor1 bor-dotted-b bor-gray400 pad10-b mar0-t mar5-b t-teal100">' . $key . '</h5>';
+    $active_section = array_key_exists($file, $e) ? ' open' : '';
+    
+    // для General делаем исключение — всегда открытая
+    if ($key == 'General') $active_section = ' open';
+        
+    echo '<details' . $active_section . '><summary class="t-small-caps cursor-pointer bor1 bor-dotted-b bor-gray400 pad10-b mar5-b t-teal100">' . $key . '</summary>';
 
     echo '<ul class="list-unstyled t90 hover-no-underline mar20-b">';
-
-    $out = '';
 
     foreach ($e as $slug => $name) {
         $link_class = ($file == $slug) ? 't-teal100 bg-teal700 hover-t-teal100 rounded3' : 'rounded3 hover-bg-teal750 t-teal100 hover-t-teal100';
@@ -70,11 +72,10 @@ foreach ($menuEl as $key => $e) {
 
         if ($slug == ':home') $slug = ''; // замена для главной
 
-        $out .= '<li><a class="w100 b-inline pad3-tb pad10-rl ' . $link_class . '" href="' . $root_url . $slug . '">' . $name . $current_add . '</a></li>';
+        echo '<li><a class="w100 b-inline pad3-tb pad10-rl ' . $link_class . '" href="' . $root_url . $slug . '">' . $name . $current_add . '</a></li>';
     }
 
-    echo $out;
-    echo '</ul>';
+    echo '</ul></details>';
 
     $idUL++;
 }

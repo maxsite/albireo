@@ -1,10 +1,27 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 
+// конфигурация админ-панели
+
+// это может быть файл: CONFIG_DIR/admin.php — приоритет
+// либо в ADMIN_DIR/config/_admin.php
+
 return [
     // список каталогов для отображения на странице Files (service)
     // каталоги указываются относительно DATA_DIR
     'serviceDirs' => ['lib'],
-
+    
+    // параметры для загрузки файлов
+    'upload' => [
+        // каталог для загрузки файлов — путь указывается относительно корня сайта BASE_DIR
+        'dir' => 'uploads', 
+        
+        // максимальный размер файла в байтах
+        'maxSize' => '20000000', 
+        
+        // разрешенные расширения файлов
+        'ext' => 'mp3|mp4|gif|jpg|jpeg|png|svg|zip|txt|rar|doc|rtf|pdf|html|htm|css|xml|odt|avi|wmv|wav|xls|7z|gz|bz2|tgz',        
+    ],
+    
     // режим работы кнопок текстового редактора — по клику или при наведении мыши
     'editorButtonMode' => 'hover', // click or hover
     
@@ -16,7 +33,6 @@ return [
     // Кавычки нужно заменять на &quot; Перенос строки это \\n
     // После вставки в textatea не работает Отмена (Ctrl+Z) — это стандартное поведение браузера
     'editorButton' => [
-
         'Format' => [
             ['B', '<b>', '</b>'],
             ['I', '<i>', '</i>'],
@@ -29,9 +45,6 @@ return [
             ['UL', '<ul>\\n', '\\n</ul>\\n'],
             ['LI', '<li>', '</li>'],
             ['-'],
-            ['HR', '<hr>', ''],
-            ['-'],
-            ['PRE', '<pre>\\n', '\\n</pre>'],
             ['CODE', '<code>', '</code>'],
             ['KBD', '<kbd>', '</kbd>'],
             ['MARK', '<mark>', '</mark>'],
@@ -46,13 +59,17 @@ return [
             ['H6', '<h6>', '</h6>'],
         ],
         
-        'Blocks' => [
+        'Other' => [
             ['P', '<p>', '</p>'],
+            ['BLOCKQUOTE', '<blockquote>', '</blockquote>'],
+            ['PRE', '<pre>\\n', '\\n</pre>'],
             ['DIV', '<div class=&quot;&quot;>', '</div>'],
             ['SPAN', '<span class=&quot;&quot;>', '</span>'],
-            ['BLOCKQUOTE', '<blockquote>', '</blockquote>'],
+            ['-'],
+            ['HR', '<hr>', ''],
             ['-'],
             ['<span class="t-mono">&lt;!-- --&gt;</span>', '<!-- ', ' -->'],
+            ['<span class="t-mono">SITE_URL</span>', '&lt;?= SITE_URL ?&gt;', ''],
         ],
 
         // https://max-3000.com/book/simple

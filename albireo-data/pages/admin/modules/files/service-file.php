@@ -29,14 +29,12 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
     service_files(ADMIN_DIR . 'config' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Admin</h4>', 0, false);
     service_files(DATA_DIR . 'backup' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Backup</h4>');
 
+    $configAdmin = getConfigAdmin();
+    $serviceDirs = $configAdmin['serviceDirs'] ?? [];
+    
     // в конфигурации может быть указаны другие каталоги для отображения
-    if (file_exists(ADMIN_DIR . '/config/_admin.php')) {
-        $configAdmin = require ADMIN_DIR . '/config/_admin.php';
-        $serviceDirs = $configAdmin['serviceDirs'] ?? [];
-
-        foreach($serviceDirs as $dir) {
-            service_files(DATA_DIR . $dir, '<h4 class="mar30-t">' . $dir . '</h4>', 0, false);
-        }
+    foreach($serviceDirs as $dir) {
+        service_files(DATA_DIR . $dir, '<h4 class="mar30-t">' . $dir . '</h4>', 0, false);
     }
 
     service_files(DATA_DIR, '<h4 class="mar30-t">Other</h4>', 2);
