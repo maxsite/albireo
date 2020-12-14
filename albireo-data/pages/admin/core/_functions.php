@@ -21,8 +21,8 @@ function getConfigAdmin($key = '')
 {
     if (file_exists(CONFIG_DIR . 'admin.php'))
         $config = require CONFIG_DIR . 'admin.php';
-    elseif (file_exists(ADMIN_DIR . '/config/_admin.php'))
-        $config = require ADMIN_DIR . '/config/_admin.php';
+    elseif (file_exists(ADMIN_DIR . 'config/_admin.php'))
+        $config = require ADMIN_DIR . 'config/_admin.php';
     else
         return [];
 
