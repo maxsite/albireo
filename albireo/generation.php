@@ -3,6 +3,8 @@
  * (c) Albireo Framework, https://maxsite.org/albireo, 2020
  */
 
+echo "\nALBIREO FRAMEWORK\n=================\n";
+ 
 require_once SYS_DIR . 'lib/functions.php';
 
 // выходной каталог
@@ -20,6 +22,8 @@ if (!is_dir($staticDir)) exit('Error: staticDir not found');
 // считать данные всех pages
 readPages();
 
+echo $staticDir . "\n";
+
 // проходимся по всем страницам
 foreach (getVal('pagesInfo') as $file => $pageData) {
     // имя выходного файла задается в slug-static
@@ -35,7 +39,7 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
         if ($fileOut == '/') $fileOut = 'index'; // преобразование для главной
         $fileOut .= '.html'; // и добавляем расширение .html
     }
-    
+
     // подчистка имени файла
     $fileOut = str_replace('\\', '/', $fileOut); // замены для windows
     $fileOut = str_replace(['<', '>', ':', '"',  '|', '?', '*'], '-', $fileOut); // недопустимые символы
@@ -57,7 +61,7 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
     }
 
     // подготовка данных для pageOut(), где формируется страница
-    setVal('pageData', $pageData); 
+    setVal('pageData', $pageData);
     setVal('pageFile', $file);
 
     // поскольку текущего URL не существует, то иммитируем на основе SITE_URL
@@ -78,7 +82,23 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
     file_put_contents($fileWrite, $content);
 
     // вывели отчёт в консоли
-    echo $fileWrite . "\n";
+    echo str_replace($staticDir, '   ', $fileWrite) . "\n";
+}
+
+// возможно указана настройка в которой хранятся имена каталогов для копирования после генераци
+if ($afterCopy = getConfig('afterCopy', [])) {
+    echo "\n";
+    
+    // перебираем их 
+    foreach ($afterCopy as $dir) {
+        // если исходный каталог действительно существует
+        if (file_exists(BASE_DIR . $dir)) {
+            echo 'Copy dir: ' . $dir . "\n"; // вывод в консоли
+            copyDir(BASE_DIR . $dir, $staticDir . $dir); // копируем каталог
+        }
+    }
+    
+    echo "\n";
 }
 
 # end of file

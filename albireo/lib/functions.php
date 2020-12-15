@@ -4,6 +4,30 @@
  */
 
 /**
+ * Скопировать один каталог в другой
+ * @param $src - исходный каталог
+ * @param $dst - каталог назначения
+ * https://www.php.net/manual/ru/function.copy.php#91010
+ */
+function copyDir(string $src, string $dst)
+{
+    $dir = opendir($src);
+    mkdir($dst);
+
+    while (false !== ($file = readdir($dir))) {
+        if (($file != '.') && ($file != '..')) {
+            if (is_dir($src . DIRECTORY_SEPARATOR . $file)) {
+                copyDir($src . DIRECTORY_SEPARATOR . $file, $dst . DIRECTORY_SEPARATOR . $file);
+            } else {
+                copy($src . DIRECTORY_SEPARATOR . $file, $dst . DIRECTORY_SEPARATOR . $file);
+            }
+        }
+    }
+
+    closedir($dir);
+}
+
+/**
  * Получить данные из файла конфигурации
  * @param $file - файл
  * @param $key - если указан ключ, то возвращаем его массив

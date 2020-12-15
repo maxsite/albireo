@@ -8,8 +8,9 @@
 return [
 	// каталог хранения готовых статичных страниц
 	'staticDir' => BASE_DIR . 'albireo-static' . DIRECTORY_SEPARATOR,	
-	'assetsUrl' => '../assets/',
+	'assetsUrl' => 'assets/',
 	'layout' => 'main.php',
+	'afterCopy' => ['assets'], // после генерации скопировать каталоги
 ];
 
 # end of file

@@ -16,7 +16,7 @@ if (isset($data[0])) {
     foreach ($pagesInfo as $page) {
         if ($page['slug'] == $data[0]) {
             $prevTitle = isset($page['title']) ? htmlspecialchars($page['title']) : htmlspecialchars($page['slug']);
-            $prevURL = SITE_URL . $page['slug'];
+            $prevURL = SITE_URL . $page['slug'] . STATIC_EXT;
             
             break;
         }
@@ -27,7 +27,7 @@ if (isset($data[1])) {
     foreach ($pagesInfo as $page) {
         if ($page['slug'] == $data[1]) {
             $nextTitle = isset($page['title']) ? htmlspecialchars($page['title']) : htmlspecialchars($page['slug']);
-            $nextURL = SITE_URL . $page['slug'];
+            $nextURL = SITE_URL . $page['slug'] . STATIC_EXT;
             
             break;
         }

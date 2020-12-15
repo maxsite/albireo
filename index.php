@@ -33,6 +33,7 @@ if (!defined('DATA_URL')) define('DATA_URL', SITE_URL . 'albireo-data/');
 if (!defined('CONFIG_DIR')) define('CONFIG_DIR', DATA_DIR . 'config' . DIRECTORY_SEPARATOR);
 if (!defined('LAYOUT_DIR')) define('LAYOUT_DIR', DATA_DIR . 'layout' . DIRECTORY_SEPARATOR);
 if (!defined('SNIPPETS_DIR')) define('SNIPPETS_DIR', DATA_DIR . 'snippets' . DIRECTORY_SEPARATOR);
+if (!defined('STATIC_EXT')) define('STATIC_EXT', '');
 
 // в зависисмости от режима, подключаем разные файлы
 if (defined('GENERATE_STATIC'))
