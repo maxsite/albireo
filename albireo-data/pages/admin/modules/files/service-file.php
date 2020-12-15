@@ -3,7 +3,7 @@
 
 title: Files (service)
 description: 
-slug: admin/files-servise
+slug: admin/files-service
 slug-static: -
 layout: pages/admin/core/_layout.php
 menu[title]: <i class="im-file-code"></i>Files (service)
