@@ -9,6 +9,10 @@
     <meta name="generator" content="Albireo Framework (https://maxsite.org/albireo)">
     <link rel="stylesheet" href="<?= getConfig('assetsUrl') ?>css/berry.css">
     <link rel="shortcut icon" href="<?= getConfig('assetsUrl') ?>images/favicon.png" type="image/x-icon">
+    <?= implode('', getKeysPageData()) ?>
+    <?= implode('', getKeysPageData('link', '<link rel="[key]" href="[val]">')) ?>
+    <?= implode('', getKeysPageData('head', '[val]')) ?>
+    <?php snippet('counter') ?>
 </head>
 <body <?= getPageData('body') ?>>
     <?php require getVal('pageFile'); ?>
