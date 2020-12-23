@@ -4,6 +4,54 @@
  */
 
 /**
+ * Шаблонизатор
+ * @param string $FILE - полное имя файла шаблона
+ * @param array $DATA - данные, которые будут доступны в файле в виде переменных
+ * @param boolean $_showError - отображать ли ошибки в файле шаблона
+ * @return string
+ * 
+ * <?= tpl(__DIR__ . '/my-block.php', ['header' => 'Hello!']) ?>
+ * 
+ * В файле шаблона можно использовать обычный php-код, а таже замены:
+ * {{ $header }} -> эквивалентно <?= $header ?>
+ * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
+ * {% код %} -> эквивалентно <?php код ?>
+ * 
+ * Также будут доступны переменные $FILE (имя текущего файла) и $DATA (исходный массив данных)
+ */
+function tpl(string $FILE, array $DATA, bool $_showError = true)
+{
+    $FILE = str_replace('\\', '/', $FILE); // замены для windows
+    $content = ''; // результат
+
+    // если файл шаблона есть
+    if (file_exists($FILE)) {
+        $_fContent = file_get_contents($FILE); // получаем его содержимое
+
+        // замены шаблонизатора
+        $_fContent = str_replace(['{*', '*}', '{{', '}}', '{%', '%}'], ['<?= htmlspecialchars(', ', ENT_QUOTES) ?>', '<?= ', ' ?>', '<?php ', ' ?>'], $_fContent);
+
+        extract($DATA, EXTR_SKIP); // распаковываем массив в php-переменные
+
+        ob_start(); // включаем буферизацию
+
+        // ловим ошибки
+        try {
+            eval('?>' . $_fContent); // выполняем код
+        } catch (Throwable $t) {
+            // если возникла ошибка, то выводим сообщение
+            if ($_showError) echo '<div>' . $t->getMessage() . ' in <b>' . $FILE . '</b></div>';
+        }
+
+        $content = ob_get_contents(); // получаем данные из буфера
+
+        if (ob_get_length()) ob_end_clean(); // очистили буфер
+    }
+
+    return $content;
+}
+
+/**
  * Скопировать один каталог в другой
  * @param $src - исходный каталог
  * @param $dst - каталог назначения
@@ -51,12 +99,12 @@ function getConfigFile(string $file, $key = '')
  *   key[index1]: val
  *   key[index2]: val
  *
- * @param $key — искомый ключ
- * @param $format — html-формат вывода [key] и [val]. Если = false, то отдаётся массив данных
- * @param $pageData — данные страницы. Если файле, то получаем автоматом из текущей
+ * @param string $key — искомый ключ
+ * @param string $format — html-формат вывода [key] и [val]. Если = false, то отдаётся массив данных
+ * @param $pageData — данные страницы. Если false, то получаем автоматом из текущей
  * @return array
  */
-function getKeysPageData($key = 'meta', $format = '<meta property="[key]" content="[val]">', $pageData = false)
+function getKeysPageData(string $key = 'meta', string $format = '<meta property="[key]" content="[val]">', $pageData = false)
 {
     $out = []; // выходной массив
 
