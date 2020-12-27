@@ -126,6 +126,7 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
                 $vRepl = str_replace('[page-title]', getPageDataHtml('title'), $vRepl);
                 $vRepl = str_replace('[page-slug]', rtrim(getPageDataHtml('slug'), '/'), $vRepl);
                 $vRepl = str_replace('[site-url]', SITE_URL, $vRepl);
+                $vRepl = str_replace('[assets-url]', getConfig('assetsUrl'), $vRepl);
 
                 $out[] = str_replace(['[key]', '[val]'], [$m[1], $vRepl], $format);
             } else {
