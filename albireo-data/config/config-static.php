@@ -11,6 +11,10 @@ return [
 	'assetsUrl' => 'assets/',
 	'layout' => 'main.php',
 	'afterCopy' => ['assets'], // после генерации скопировать каталоги
+	
+	// каталоги, где ещё могут располагаться страницы, кроме DATA_DIR и /pages
+	// указывается полный путь
+	// 'dirsForPages' => [BASE_DIR . 'my-pages'],
 ];
 
 # end of file

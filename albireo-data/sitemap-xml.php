@@ -4,6 +4,7 @@
 layout: empty.php
 slug: sitemap.xml
 slug-static: sitemap.xml
+title: sitemap.xml
 compress: 0
 parser: -
 sitemap: -
@@ -37,7 +38,7 @@ foreach($pagesInfo as $file => $info) {
 	if (isset($info['sitemap']) and $info['sitemap'] == '-') continue;
 	
 	// исключить pages/admin
-	if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR  . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) continue;
+	if (strpos($file, DATA_DIR . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) continue;
 	
 	$changefreq = $info['sitemap-changefreq'] ?? $changefreqDef;
 	$priority = $info['sitemap-priority'] ?? $priorityDef;

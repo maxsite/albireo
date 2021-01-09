@@ -6,7 +6,7 @@ description:
 slug: demo-access1
 slug-static: -
 parser: simple
-init-file: pages/admin/core/_functions.php
+init-file: admin/core/_functions.php
 
 **/
 

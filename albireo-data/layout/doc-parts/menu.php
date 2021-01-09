@@ -20,7 +20,7 @@ $menuEl = []; // массив данных меню
 foreach (getVal('pagesInfo') as $file => $pageData) {
 
 	// исключаем всю админ-панель
-	if (strpos($file, DATA_DIR . 'pages' . DIRECTORY_SEPARATOR . 'admin' . DIRECTORY_SEPARATOR) !== false) continue;
+	if (strpos($file, DATA_DIR . 'admin' . DIRECTORY_SEPARATOR) !== false) continue;
 
 	// берём те, у которых есть параметр «menu»
 	if ($m = getKeysPageData('menu', '', $pageData)) {

@@ -27,9 +27,17 @@ require LAYOUT_DIR . 'doc-parts/head.php';
             <button class="button button2" onclick="document.getElementById('myNav').classList.toggle('hide-tablet');">☰ Open menu</button>
         </div>
 
-        <article<?php if ($a = getPageData('articleClass', '')) echo ' class="' . $a . '"'; ?>><?php require getVal('pageFile'); ?></article>
+        <article<?= getPageData('articleClass', '', ' class="', '"') ?>>
+            <?php
+            if ($t = getVal('pageFileContent', ''))
+                echo $t;
+            else
+                require getVal('pageFile');
+            ?>
+        </article>
     </section>
-
+    
+	<?= implode(getKeysPageData('lazy', '[val]')) ?>
     <script src="<?= getConfig('assetsUrl') ?>js/my.js"></script>
 </body>
 </html>

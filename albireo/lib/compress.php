@@ -32,6 +32,9 @@ function compress_html($text)
 	$text = str_replace('>    <', '><', $text);
 	$text = str_replace('>   <', '><', $text);
 	$text = str_replace('>  <', '><', $text);
+	$text = str_replace('<body >', '<body>', $text);
+	$text = str_replace('<article >', '<article>', $text);
+	$text = str_replace('<div >', '<div>', $text);
 
 	$text = preg_replace_callback('!\[html_base64\](.*?)\[\/html_base64\]!is', function ($m) {
 		return base64_decode($m[1]);

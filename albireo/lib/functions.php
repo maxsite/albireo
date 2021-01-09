@@ -127,6 +127,7 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
                 $vRepl = str_replace('[page-slug]', rtrim(getPageDataHtml('slug'), '/'), $vRepl);
                 $vRepl = str_replace('[site-url]', SITE_URL, $vRepl);
                 $vRepl = str_replace('[assets-url]', getConfig('assetsUrl'), $vRepl);
+                $vRepl = str_replace('[EOL]', PHP_EOL, $vRepl);
 
                 $out[] = str_replace(['[key]', '[val]'], [$m[1], $vRepl], $format);
             } else {
@@ -218,44 +219,28 @@ function pageOut()
             require_once DATA_DIR . $pageData['init-file'];
         }
 
-        // файл подключаем отдельно, чтобы его изолировать от текущей функции
-        $content = _getContentFile($mainFile);
+        // если у страницы отмечен флаг parser-content-only, то обрабатываем файл страницы отдельно от LAYOUT
+        if (isset($pageData['parser-content-only']) and $pageData['parser-content-only']) {
+            // файл страницы подключаем отдельно, чтобы его изолировать от текущей функции
+            $contentPage = _getContentFile(getVal('pageFile'));
 
-        // если указан парсер
-        // чтобы отключить парсер можно указать «-» (минус)
-        if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
-            $parser = $pageData['parser']; // название парсера
-            $parserFile = SYS_DIR . 'lib/' . $parser . '.php'; // файл парсера
+            // обработка контента
+            $contentPage = processingContent($contentPage, $pageData);
 
-            if (file_exists($parserFile))
-                require_once $parserFile; // подключили файл
+            // сохраним данные для вывода
+            setVal('pageFileContent', $contentPage);
 
-            if (function_exists($parser))
-                $content = $parser($content); // обработали текст через функцию парсера
+            // подключаем LAYOUT, который уже сам выведет pageFileContent
+            $content = _getContentFile($mainFile);
+        } else {
+            // файл LAYOUT подключаем отдельно, чтобы его изолировать от текущей функции
+            $content = _getContentFile($mainFile);
+
+            // обработка контента
+            $content = processingContent($content, $pageData);
         }
 
-        // Содержимое PRE и CODE можно заменить на html-сущности
-        if (isset($pageData['protect-pre']) and $pageData['protect-pre']) {
-            $content = protectHTMLCode($content);
-        }
-
-        // произвольные php-функции для обработки контента
-        // функция должна принимать только один параметр
-        // функций может быть несколько через пробел
-        // если функция недоступна она игнорируется
-        // text-function: trim
-        if (isset($pageData['text-function']) and $tf = $pageData['text-function']) {
-            $tf = explode(' ', $tf); // список в массив
-            $tf = array_map('trim', $tf); // обрежем пробелы
-
-            // проходимся по ним
-            foreach ($tf as $f) {
-                // если функция есть, то выполняем её
-                if (function_exists($f)) $content = $f($content);
-            }
-        }
-
-        // сжатие html-кода
+        // сжатие html-кода выполняется для всей страницы
         if (isset($pageData['compress']) and $pageData['compress']) {
             require_once SYS_DIR . 'lib/compress.php'; // подключили файл
 
@@ -269,25 +254,78 @@ function pageOut()
 }
 
 /**
- * Получить параметры страницы
- * @param $key - ключ
- * @param $default - значение по умолчанию
+ * Обработка текста через функции - используется в pageOut()
+ * @param string $content - текст
+ * @param array $pageData - данные страницы
+ * @return string
  */
-function getPageData(string $key,  $default = '')
+function processingContent(string $content, array $pageData)
 {
-    $pageData = getVal('pageData');
+    // если указан парсер
+    // чтобы отключить парсер можно указать «-» (минус)
+    if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
+        $parser = $pageData['parser']; // название парсера
+        $parserFile = SYS_DIR . 'lib/' . $parser . '.php'; // файл парсера
 
-    return $pageData[$key] ?? $default;
+        if (file_exists($parserFile))
+            require_once $parserFile; // подключили файл
+
+        if (function_exists($parser))
+            $content = $parser($content); // обработали текст через функцию парсера
+    }
+
+    // Содержимое PRE и CODE можно заменить на html-сущности
+    if (isset($pageData['protect-pre']) and $pageData['protect-pre']) {
+        $content = protectHTMLCode($content);
+    }
+
+    // произвольные php-функции для обработки контента
+    // функция должна принимать только один параметр
+    // функций может быть несколько через пробел
+    // если функция недоступна она игнорируется
+    // text-function: trim
+    if (isset($pageData['text-function']) and $tf = $pageData['text-function']) {
+        $tf = explode(' ', $tf); // список в массив
+        $tf = array_map('trim', $tf); // обрежем пробелы
+
+        // проходимся по ним
+        foreach ($tf as $f) {
+            // если функция есть, то выполняем её
+            if (function_exists($f)) $content = $f($content);
+        }
+    }
+
+    return $content;
 }
 
 /**
- * Получить параметры страницы с обработкой HTML
+ * Получить параметры страницы
  * @param $key - ключ
- * @param $default - значение по умолчанию
+ * @param $default - значение по умолчанию, если нет в данных страницы
+ * @param $before - приставка к результату, если он есть
+ * @param $after - корень к результату, если он есть
  */
-function getPageDataHtml(string $key,  $default = '')
+function getPageData(string $key,  $default = '', $before = '', $after = '')
 {
-    return htmlspecialchars(getPageData($key,  $default));
+    $pageData = getVal('pageData');
+
+    $result = $pageData[$key] ?? $default;
+
+    if ($result) $result = $before . $result . $after;
+
+    return $result;
+}
+
+/**
+ * Получить параметры страницы с обработкой HTML - аналогично getPageData()
+ * @param $key - ключ
+ * @param $default - значение по умолчанию, если нет в данных страницы
+ * @param $before - приставка к результату, если он есть
+ * @param $after - корень к результату, если он есть
+ */
+function getPageDataHtml(string $key,  $default = '', $before = '', $after = '')
+{
+    return htmlspecialchars(getPageData($key,  $default, $before, $after));
 }
 
 /**
@@ -440,25 +478,12 @@ function readPages()
     // основные файлы страниц
     $allFiles = glob(DATA_DIR . '*.php');
 
-    // если есть каталог pages, то проходимся по нему в рекурсивном режиме
-    $pages = [];
+    // получаем все php-файлы из указанных каталогов в конфигурации dirsForPages
+    // каталоги DATA_DIR/pages и DATA_DIR/admin подключаются всегда
+    $addDirs = array_merge([DATA_DIR . 'pages', DATA_DIR . 'admin'], getConfig('dirsForPages', []));
+    $addFiles = _addFiles($addDirs);
 
-    if (is_dir(DATA_DIR . 'pages')) {
-
-        // сортировка по каталогам, а потом по файлам
-        // используется свой вспомогательный класс PageSortedIterator
-        $directory = new \RecursiveDirectoryIterator(DATA_DIR . 'pages');
-        $iterator = new \RecursiveIteratorIterator($directory);
-        $sit = new \PageSortedIterator($iterator);
-
-        foreach ($sit as $info) {
-            // добавляем только php-файлы
-            if ($info->isFile() and $info->getExtension() == 'php') $pages[] = $info->getPathname();
-        }
-    }
-
-    // если файлы в pages найдены, то объединяем их с основными
-    if ($pages) $allFiles = array_merge($allFiles, $pages);
+    if ($addFiles) $allFiles = array_merge($allFiles, $addFiles);
 
     // убираем те, которые начинаются с «_» и «.»
     $allFiles = array_filter($allFiles, function ($x) {
@@ -500,11 +525,25 @@ function readPages()
             // конечный результат — массив с дефолтными данными
             $info = $defaultInfo;
 
+            $pseudoRand = 1; // иммитируем случайное число в пределах всего массива данных
+
             foreach ($a1 as $a2) {
                 $pos = strpos($a2, ": "); // найдём первое вхождение «: »
 
-                if ($pos !== false) // если есть, обработаем и в массив результата
-                    $info[trim(substr($a2, 0, $pos))] = trim(substr($a2, $pos + 1));
+                if ($pos !== false) {
+                    // если есть, обработаем и в массив результата
+
+                    // ключ
+                    $k = trim(substr($a2, 0, $pos));
+
+                    // если в ключе есть [], то заменим на [*$pseudoRand], чтобы обеспечить его уникальность
+                    // используется для короткой записи, чтобы не указывать уникальный ключ
+                    // head[]: что-то
+                    // head[]: ещё что-то
+                    $k = str_replace('[]', '[-' . $pseudoRand++ . ']', $k);
+
+                    $info[$k] = trim(substr($a2, $pos + 1));
+                }
             }
 
             // если у файла не указано поле slug, то делаем его автоматом
@@ -517,9 +556,11 @@ function readPages()
                 // или в самом DATA_DIR
                 $f = str_replace(DATA_DIR, '', $f);
 
+                // но, если это другой каталог, то ставим slug относительно BASE_DIR
+                $f = str_replace(BASE_DIR, '', $f);
+
                 // инфо о файле
                 $parts = pathinfo($f);
-
 
                 // берём только путь и имя файла без расширения
                 $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
@@ -541,6 +582,37 @@ function readPages()
     // данные серилизуем
 
     setCache('pagesinfo.txt', $pagesInfo);
+}
+
+/**
+ * Получить все php-файлы из указанных каталогов
+ * @param array $dirs - список каталогов
+ **/
+function _addFiles(array $dirs)
+{
+    $out = [];
+
+    foreach ($dirs as $dir) {
+        $files = [];
+
+        if (is_dir($dir)) {
+            // сортировка по каталогам, а потом по файлам
+            // используется свой вспомогательный класс PageSortedIterator
+            $directory = new \RecursiveDirectoryIterator($dir);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $sit = new \PageSortedIterator($iterator);
+
+
+            foreach ($sit as $info) {
+                // добавляем только php-файлы
+                if ($info->isFile() and $info->getExtension() == 'php') $files[] = $info->getPathname();
+            }
+        }
+
+        if ($files) $out = array_merge($out, $files);
+    }
+
+    return $out;
 }
 
 /**
@@ -584,18 +656,10 @@ function getCache(string $file)
     if (file_exists(CACHE_DIR . $file)) {
         // проверим не устарел ли кэш
 
-        // смотрим «снимок» каталога DATA_DIR
+        // смотрим «снимок» каталогов, включая DATA_DIR
         // это позволяет отслеживать все изменения
-        $snapshot = ''; // текущий «снимок»
-
-        // рекурсивно обходим каталог DATA_DIR
-        $directory = new \RecursiveDirectoryIterator(DATA_DIR);
-        $iterator = new \RecursiveIteratorIterator($directory);
-
-        foreach ($iterator as $info) {
-            // в «снимок» идут имена файлов и их даты
-            $snapshot .= $info->getPathname() . $info->getMTime();
-        }
+        $addDirs = array_merge([DATA_DIR], getConfig('dirsForPages', []));
+        $snapshot = getSnapshot($addDirs); // текущий «снимок»
 
         // сравниваем старый (из кэша) и новый «снимки»
 
@@ -636,6 +700,32 @@ function getCache(string $file)
         // файла кэша вообще нет
         return false;
     }
+}
+
+/**
+ * Создание snapshot из файлов указанных каталогов (включая вложенные)
+ * @param array $dirs - каталоги
+ * @return string
+ */
+function getSnapshot(array $dirs)
+{
+    $snapshot = '';
+
+    foreach ($dirs as $dir) {
+
+        if (!is_dir($dir)) continue;
+
+        // рекурсивно обходим каталог
+        $directory = new \RecursiveDirectoryIterator($dir);
+        $iterator = new \RecursiveIteratorIterator($directory);
+
+        foreach ($iterator as $info) {
+            // в «снимок» идут имена файлов и их даты
+            $snapshot .= $info->getPathname() . $info->getMTime();
+        }
+    }
+
+    return $snapshot;
 }
 
 /**
