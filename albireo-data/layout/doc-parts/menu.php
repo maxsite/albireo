@@ -61,6 +61,19 @@ $menuEl = $e;
 // если нет элементов меню, выходим
 if (!$menuEl) return;
 
+// сортировка групп как указано в groupOrder
+$groupOrder = $options['groupOrder'] ?? false;
+
+if ($groupOrder) {
+    $mt = [];
+    
+    foreach($groupOrder as $g) {
+        if (isset($menuEl[$g])) $mt[$g] = $menuEl[$g];    
+    }
+    
+    $menuEl = array_merge($mt, $menuEl);
+}
+
 // текущий адрес
 $file = getPageData('slug');
 
@@ -74,7 +87,7 @@ foreach ($menuEl as $key => $e) {
 	foreach ($e as $slug => $name) {
 
 		$link_class = ($file == $slug) ? $options['current'] : $options['elements'];
-		$current_add = ($file == $slug) ? $options['current_add'] : '';
+		$current_add = ($file == $slug) ? $options['currentAdd'] : '';
 
 		if (defined('GENERATE_STATIC')) $slug .= '.html';
 		

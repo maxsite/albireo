@@ -10,5 +10,8 @@ return [
     'list' => 'list-unstyled t90 hover-no-underline mar20-b animation-fade',
     'current' => 't-teal100 bg-teal700 hover-t-teal100 rounded3',
     'elements' => 't-teal100 hover-bg-teal750 hover-t-teal100 rounded3',
-    'current_add' => '',
+    'currentAdd' => '',
+    
+    // порядок групп меню
+    // 'groupOrder' => ['Основы', 'Настройка'],
 ];

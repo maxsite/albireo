@@ -31,7 +31,7 @@ foreach ($menuEl as $key => $e) {
 
 	foreach ($e as $slug => $name) {
 		$link_class = ($file == $slug) ? $options['current'] : $options['elements'];
-		$current_add = ($file == $slug) ? $options['current_add'] : '';
+		$current_add = ($file == $slug) ? $options['currentAdd'] : '';
 
 		if ($slug == ':home') $slug = ''; // замена для главной
 		if (defined('GENERATE_STATIC')) $slug .= '.html';
