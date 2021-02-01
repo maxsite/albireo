@@ -60,7 +60,10 @@ $readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">r
 
 <div class="h100vh-min flex flex-column">
     <div class="flex-grow0 flex flex-vcenter pad20-tb bg-yellow250 pad30-rl mar10-b">
-        <h1 class="flex-grow5 h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup><?= $readOnly ?></h1>
+        <div class="flex-grow5">
+			<h1 class="h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup><?= $readOnly ?></h1>
+			<div class="t80 t-gray500"><?= htmlspecialchars(BASE_DIR . $fileEdit) ?></div>
+		</div>
         <div class="im-times cursor-pointer hover-t-red600" onclick="deleteFile('<?= $segmentFile ?>')">Delete file</div>
     </div>
 
