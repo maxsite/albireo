@@ -4,10 +4,10 @@ $menuEl = []; // массив данных меню
 
 // проходимся по всем страницам
 foreach (getVal('pagesInfo') as $file => $pageData) {
-    
+
     // только файлы из админ-панели
-	if (strpos($file, ADMIN_DIR) === false) continue;
-    
+    if (strpos($file, ADMIN_DIR) === false) continue;
+
     // берём те, у которых есть параметр «menu»
     if ($m = getKeysPageData('admin-menu', '', $pageData)) {
 
@@ -44,9 +44,6 @@ foreach ($menuEl as $k => $v) {
 }
 
 $menuEl = $e;
-
-// pr($menuEl);
-
 $idUL = 1;
 
 // текущий адрес
@@ -56,15 +53,17 @@ if ($file == '/') $file = ':home'; // замена для главной
 
 foreach ($menuEl as $key => $e) {
     $active_section = array_key_exists($file, $e) ? ' open' : '';
-    
+
     // для General делаем исключение — всегда открытая
     if ($key == 'General') $active_section = ' open';
-        
+
     echo '<details' . $active_section . '><summary class="t-small-caps cursor-pointer bor1 bor-dotted-b bor-gray400 pad10-b mar5-b t-teal100">' . $key . '</summary>';
 
     echo '<ul class="list-unstyled t90 hover-no-underline mar20-b">';
 
     foreach ($e as $slug => $name) {
+        if ($name == '---') continue; // пустое меню — используется, чтобы открыть группу
+        
         $link_class = ($file == $slug) ? 't-teal100 bg-teal700 hover-t-teal100 rounded3' : 'rounded3 hover-bg-teal750 t-teal100 hover-t-teal100';
 
         $current_add = ($file == $slug) ? '<span class="b-inline b-right"> ●</span>' : '';

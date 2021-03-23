@@ -52,6 +52,9 @@ if (!$errors) {
 
         // выводим сообщение на случай задержки редиректа
         //  echo '<div class="mar30-tb t-center"><a href="' . SITE_URL . 'admin">Welcome to Admin →</a></div>';
+        
+        // данные входа заносим в базу лога
+        Logging\Log::info('Login: ' . $user['username'] . ' IP: ' . $_SERVER['REMOTE_ADDR']);
 
         // делаем редирект
         // он может быть во флэш-сессии 

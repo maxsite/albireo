@@ -19,37 +19,36 @@ $buttons = '';
 
 $configAdmin = getConfigAdmin();
 
+$editorButton = $configAdmin['editorButton'] ?? [];
+$editorButtonMode = $configAdmin['editorButtonMode'] ?? 'click';
 
-    $editorButton = $configAdmin['editorButton'] ?? [];
-    $editorButtonMode = $configAdmin['editorButtonMode'] ?? 'click';
-    
-    if ($editorButtonMode == 'hover') {
-        $addMode1 = '@mouseover="open = true" @mouseout="open = false" @click="open = true"';
-        $addMode2 = '@mouseover="open = true" @mouseout="open = false"';
-    } else {
-        $addMode1 = '@click="open = true"';
-        $addMode2 = '';
+if ($editorButtonMode == 'hover') {
+    $addMode1 = '@mouseover="open = true" @mouseout="open = false" @click="open = true"';
+    $addMode2 = '@mouseover="open = true" @mouseout="open = false"';
+} else {
+    $addMode1 = '@click="open = true"';
+    $addMode2 = '';
+}
+
+// используется Alpine.js
+foreach ($editorButton as $name => $group) {
+    $buttons .= '<div x-data="{open: false}" class="pos-relative b-inline">';
+    $buttons .= '<button ' . $addMode1 . ' :class="{\'bg-teal500\': open}" class="button mar5-r hover-bg-teal500">' . $name . '</button>';
+    $buttons .= '<div x-show="open" ' . $addMode2 . ' @click.away="open = false" @click="open = false" class="animation-fade bordered pos-absolute w100px-min z-index1 bg-white b-shadow-var" x-cloak>';
+
+    foreach ($group as $button) {
+        $title = $button[3] ?? '';
+
+        if ($title) $title = ' title="' . htmlspecialchars($title) . '"';
+
+        if ($button[0] == '-')
+            $buttons .= '<hr class="mar5-tb bor-dotted-t bor1">';
+        else
+            $buttons .= '<div class="pad10-rl hover-bg-blue100 cursor-pointer" onClick="addText(\'' . $button[1] . '\', \'' . $button[2] . '\');"' . $title . '>' . $button[0] . '</div>';
     }
-    
-    // используется Alpine.js
-    foreach ($editorButton as $name => $group) {
-        $buttons .= '<div x-data="{open: false}" class="pos-relative b-inline">';
-        $buttons .= '<button ' . $addMode1 . ' :class="{\'bg-teal500\': open}" class="button mar5-r hover-bg-teal500">' . $name . '</button>';
-        $buttons .= '<div x-show="open" ' . $addMode2 . ' @click.away="open = false" @click="open = false" class="animation-fade bordered pos-absolute w100px-min z-index1 bg-white b-shadow-var" x-cloak>';
 
-        foreach ($group as $button) {
-            $title = $button[3] ?? '';
-
-            if ($title) $title = ' title="' . htmlspecialchars($title) . '"';
-
-            if ($button[0] == '-')
-                $buttons .= '<hr class="mar5-tb bor-dotted-t bor1">';
-            else
-                $buttons .= '<div class="pad10-rl hover-bg-blue100 cursor-pointer" onClick="addText(\'' . $button[1] . '\', \'' . $button[2] . '\');"' . $title . '>' . $button[0] . '</div>';
-        }
-
-        $buttons .= '</div></div>';
-    }
+    $buttons .= '</div></div>';
+}
 
 $readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">read only</sup>';
 
@@ -61,9 +60,9 @@ $readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">r
 <div class="h100vh-min flex flex-column">
     <div class="flex-grow0 flex flex-vcenter pad20-tb bg-yellow250 pad30-rl mar10-b">
         <div class="flex-grow5">
-			<h1 class="h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup><?= $readOnly ?></h1>
-			<div class="t80 t-gray500"><?= htmlspecialchars(BASE_DIR . $fileEdit) ?></div>
-		</div>
+            <h1 class="h3 mar0"><?= $previewLink ?><?= str_replace('\\', '/', $fileEdit) ?><sup id="flagModified" class="t-gray600"></sup><?= $readOnly ?></h1>
+            <div class="t80 t-gray500"><?= htmlspecialchars(BASE_DIR . $fileEdit) ?></div>
+        </div>
         <div class="im-times cursor-pointer hover-t-red600" onclick="deleteFile('<?= $segmentFile ?>')">Delete file</div>
     </div>
 

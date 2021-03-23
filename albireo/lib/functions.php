@@ -4,10 +4,38 @@
  */
 
 /**
- * Шаблонизатор
+ * Добавить данные во flash-сессию
+ * https://maxsite.org/page/php-flash-message
+ * 
+ * @param string $key - ключ
+ * @param $val - данные
+ */
+function sessionFlashSet(string $key, $val)
+{
+    $_SESSION['_flash'][$key] = $val;
+}
+
+/**
+ * Получить данные из flash-сессии, после чего данные удалятся
+ * @param string $key - ключ
+ */
+function sessionFlashGet(string $key)
+{
+    if (isset($_SESSION['_flash'][$key])) {
+        $data = $_SESSION['_flash'][$key];
+        unset($_SESSION['_flash'][$key]);
+
+        return $data;
+    } else {
+        return '';
+    }
+}
+
+/**
+ * Шаблонизатор для файла / используется tplContent()
  * @param string $FILE - полное имя файла шаблона
  * @param array $DATA - данные, которые будут доступны в файле в виде переменных
- * @param boolean $_showError - отображать ли ошибки в файле шаблона
+ * @param boolean $showError - отображать ли ошибки в файле шаблона
  * @return string
  * 
  * <?= tpl(__DIR__ . '/my-block.php', ['header' => 'Hello!']) ?>
@@ -17,36 +45,56 @@
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
  * 
- * Также будут доступны переменные $FILE (имя текущего файла) и $DATA (исходный массив данных)
+ * Также будет доступна переменная $DATA (исходный массив данных)
  */
-function tpl(string $FILE, array $DATA, bool $_showError = true)
+function tpl(string $FILE, array $DATA = [], bool $showError = true)
 {
     $FILE = str_replace('\\', '/', $FILE); // замены для windows
     $content = ''; // результат
 
     // если файл шаблона есть
     if (file_exists($FILE)) {
-        $_fContent = file_get_contents($FILE); // получаем его содержимое
-
-        // замены шаблонизатора
-        $_fContent = str_replace(['{*', '*}', '{{', '}}', '{%', '%}'], ['<?= htmlspecialchars(', ', ENT_QUOTES) ?>', '<?= ', ' ?>', '<?php ', ' ?>'], $_fContent);
-
-        extract($DATA, EXTR_SKIP); // распаковываем массив в php-переменные
-
-        ob_start(); // включаем буферизацию
-
-        // ловим ошибки
-        try {
-            eval('?>' . $_fContent); // выполняем код
-        } catch (Throwable $t) {
-            // если возникла ошибка, то выводим сообщение
-            if ($_showError) echo '<div>' . $t->getMessage() . ' in <b>' . $FILE . '</b></div>';
-        }
-
-        $content = ob_get_contents(); // получаем данные из буфера
-
-        if (ob_get_length()) ob_end_clean(); // очистили буфер
+        $fContent = file_get_contents($FILE); // получаем его содержимое
+        $content = tplContent($fContent, $DATA, $showError, $FILE);
     }
+
+    return $content;
+}
+
+/**
+ * Шаблонизатор для произвольного текста
+ * @param string $_Content - текст
+ * @param array $DATA - данные, которые будут доступны в файле в виде переменных
+ * @param boolean $_showError - отображать ли ошибки в файле шаблона
+ * @param boolean $FILE - имя файла для вывода в ошибках
+ * @return string
+ * 
+ * В тексте можно использовать обычный php-код, а таже замены:
+ * {{ $header }} -> эквивалентно <?= $header ?>
+ * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
+ * {% код %} -> эквивалентно <?php код ?>
+ * Также будет доступна переменная $DATA (исходный массив данных)
+ */
+function tplContent(string $_Content, array $DATA = [], bool $_showError = true, string $FILE = '')
+{
+    // замены шаблонизатора
+    $_Content = str_replace(['{*', '*}', '{{', '}}', '{%', '%}'], ['<?= htmlspecialchars(', ', ENT_QUOTES) ?>', '<?= ', ' ?>', '<?php ', ' ?>'], $_Content);
+
+    extract($DATA, EXTR_SKIP); // распаковываем массив в php-переменные
+
+    ob_start(); // включаем буферизацию
+
+    // ловим ошибки
+    try {
+        eval('?>' . $_Content); // выполняем код
+    } catch (Throwable $t) {
+        // если возникла ошибка, то выводим сообщение
+        if ($_showError) echo '<div>' . $t->getMessage() . ' in <b>' . $FILE . '</b></div>';
+    }
+
+    $content = ob_get_contents(); // получаем данные из буфера
+
+    if (ob_get_length()) ob_end_clean(); // очистили буфер
 
     return $content;
 }
@@ -128,6 +176,7 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
                 $vRepl = str_replace('[site-url]', SITE_URL, $vRepl);
                 $vRepl = str_replace('[assets-url]', getConfig('assetsUrl'), $vRepl);
                 $vRepl = str_replace('[EOL]', PHP_EOL, $vRepl);
+                $vRepl = str_replace('[data-url]', DATA_URL, $vRepl);
 
                 $out[] = str_replace(['[key]', '[val]'], [$m[1], $vRepl], $format);
             } else {
@@ -217,6 +266,13 @@ function pageOut()
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
         if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
             require_once DATA_DIR . $pageData['init-file'];
+        }
+
+        // у страницы может быть параметр require[] где перечислены файлы для подключения
+        if ($rFiles = getKeysPageData('require', '[val]', $pageData)) {
+            foreach ($rFiles as $fn) {
+                if (file_exists($fn)) require_once $fn;
+            }
         }
 
         // если у страницы отмечен флаг parser-content-only, то обрабатываем файл страницы отдельно от LAYOUT
@@ -438,10 +494,28 @@ function getCurrentUrl()
     // амперсанд меняем на html-вариант
     $url = str_replace('&', '&amp;', $url);
 
-    // отсекаем часть ?-get
+    $query = '';
+    $queryData = [];
+
+    // если есть ?-query
     if (strpos($url, '?') !== false) {
-        $u = explode('?', $url);
-        $url = $u[0];
+        $u = explode('?', $url); // разделяем на два элемента
+        $url = $u[0]; // отсекаем часть ?-get
+
+        $query = $u[1]; // вся строчка query
+
+        $qs = str_replace('&amp;', '&', $query); // обработка амперсанда
+        $qs = explode('&', $qs); // строку в массив
+
+        // каждый элемент query парсим через parse_str()
+        // и заносим в итоговый массив
+        foreach ($qs as $val) {
+            parse_str($val, $arr);
+
+            foreach ($arr as $key1 => $val1) {
+                $queryData[$key1] = $val1;
+            }
+        }
     }
 
     // удалим правый слэш
@@ -459,6 +533,8 @@ function getCurrentUrl()
         'method' => $method,
         'url' => $url,
         'urlFull' => SITE_URL . $url,
+        'query' => $query,
+        'queryData' => $queryData,
     ]);
 }
 
@@ -751,7 +827,7 @@ function setVal(string $key, $value)
 /**
  * хранилище данных
  * @param если $set = true, то это запись данных в хранилище
- * @param если $set = fasle, то получение данных из хранилища
+ * @param если $set = false, то получение данных из хранилища
  * @param $key - ключ
  * @param $value - значение для записи
  * @param $default - дефолтное значение, если ключ не определён
@@ -862,5 +938,110 @@ function pr($var, $html = true, $echo = true)
         echo '</pre>';
     }
 }
+
+/**
+ * Добавить файл/каталог к карте php-классов, который будут загружен в spl_autoload_register()
+ * Используется для классов вне PSR-4
+ * @param string $class — имя класса
+ * @param string $path — полный путь к файлу или каталогу
+ * 
+ * addClassmap('log\Model', __DIR__ . '/Model.php');
+ * $m = new log\Model;
+ * 
+ * addClassmap('admin\log', __DIR__);
+ * $m = new admin\log\Controller; // admin/log/Controller.php
+ * $m = new admin\log\Model; // admin/log/Model.php
+ * $v = new admin\log\View; // admin/log/View.php
+ * 
+ */
+function addClassmap(string $class, string $path)
+{
+    $map = getVal('_classmap', []);
+    $map[$class] = $path;
+    setVal('_classmap', $map);
+}
+
+/**
+ * Autoload Composer
+ * Располагается в корне сайта в каталоге vendor
+ */
+if (file_exists(BASE_DIR . 'vendor/autoload.php')) require_once BASE_DIR . 'vendor/autoload.php';
+
+/**
+ * Register autoload classes PSR-4
+ * https://www.php-fig.org/psr/psr-4/
+ * https://maxsite.org/page/php-autoload
+ * 
+ * Файл класса располагается в либо в albireo/psr4
+ * либо в albireo-data (DATA_DIR и имеет приоритет)
+ * Либо используется classmap (см. addClassmap)
+ * 
+ * Каталог указывает на namespace
+ *
+ * Пример 1
+ * File: albireo/psr4/Pdo/PdoConnect.php
+ *   namespace Pdo;
+ *   class PdoConnect {...}
+ *
+ *   $t = new Pdo\PdoConnect;
+ *
+ * Пример 2
+ * File: albireo-data/myLib/myClass.php
+ *   namespace myLib;
+ *   class myClass {...}
+ *
+ *   $t = new myLib\myClass;
+ *
+ */
+spl_autoload_register(function ($class) {
+    // разбиваем класс на элементы
+    $namespace = explode('\\', $class);
+
+    // получаем имя файла из имени класса - в $namespace окажется только namespace
+    $file = array_pop($namespace) . '.php';
+
+    // получаем путь на основе namespace
+    $path = implode(DIRECTORY_SEPARATOR, $namespace);
+
+    // формируем имя файла
+    $fn0 = $path . DIRECTORY_SEPARATOR . $file;
+
+    // добавляем базовый путь DATA_DIR и SYS_DIR
+    $fn1 = DATA_DIR . $fn0; // путь от albireo-data/
+    $fn2 = SYS_DIR . 'psr4' . DIRECTORY_SEPARATOR . $fn0; // путь от albireo/psr4/
+
+    // для теста, если интересно что в итоге получается
+    // pr($class); // admin\modules\options\mvc\Controller
+    // pr($fn0);   // admin\modules\options\mvc\Controller.php
+    // pr($fn1);   // albireo\my\albireo-data\admin\modules\options\mvc\Controller.php
+    // pr($fn2);   // albireo\my\albireo\psr4\admin\modules\options\mvc\Controller.php
+
+    // проверка на существование файлов и подключение
+    if (file_exists($fn1)) require $fn1;
+    elseif (file_exists($fn2)) require $fn2;
+    else {
+        // проверка в classmap
+        // это может быть как файл, так и каталог (равен namespace)
+        if ($map = getVal('_classmap', [])) {
+            // формируем namespace из массива
+            $ns = implode('\\', $namespace);
+
+            // путь получаем из $map
+            $path = $map[$ns] ?? false;
+
+            // проверяем есть ли что-то по этому пути
+            if ($path and file_exists($path)) {
+                if (is_file($path)) {
+                    require_once $path; // это файл
+                } elseif (is_dir($path)) {
+                    // это каталог
+                    $fn3 = $path . DIRECTORY_SEPARATOR . $file;
+
+                    if (file_exists($fn3)) require_once $fn3;
+                }
+            }
+        }
+    }
+});
 
 # end of file

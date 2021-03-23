@@ -22,12 +22,17 @@ require_once __DIR__ . '/_functions.php';
         h2 {
             margin-top: 40px;
         }
+
+        [x-cloak] {
+            display: none
+        }
+
         #myNav::-webkit-scrollbar {
-            width: 14px; 
+            width: 14px;
             height: 14px;
             background-color: #185B56;
         }
-        
+
         #myNav::-webkit-scrollbar-thumb {
             background-color: #1F736B;
             border-radius: 14px;
@@ -35,6 +40,10 @@ require_once __DIR__ . '/_functions.php';
 
         #myNav::-webkit-scrollbar-thumb:hover {
             background-color: #217b72;
+        }
+
+        textarea {
+            tab-size: 4
         }
     </style>
     <?= implode(getKeysPageData('head', '[val]')) ?>

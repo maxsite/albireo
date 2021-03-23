@@ -21,6 +21,10 @@ return [
         // разрешенные расширения файлов
         'ext' => 'mp3|mp4|gif|jpg|jpeg|png|svg|zip|txt|rar|doc|rtf|pdf|html|htm|css|xml|odt|avi|wmv|wav|xls|7z|gz|bz2|tgz',        
     ],
+
+    // временная поправка в формате strtotime()
+    // https://www.php.net/manual/ru/function.strtotime.php
+    'timezone' => '+2 hours',
     
     // режим работы кнопок текстового редактора — по клику или при наведении мыши
     'editorButtonMode' => 'hover', // click or hover

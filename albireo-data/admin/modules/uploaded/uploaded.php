@@ -13,8 +13,7 @@ layout: admin/core/_layout.php
 parser: -
 protect-pre: 0
 compress: 1
-head[]: <style>[x-cloak]{display: none}</style>
-head[]: <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
 
  **/
 
@@ -36,6 +35,8 @@ if ($uploadDir and file_exists(BASE_DIR . $uploadDir)) {
             $d = str_replace(BASE_DIR, '', $info->getPathname());
             $d = str_replace('\\', '/', $d); // windows
 
+            if (basename($d) == '.htaccess') continue; // пропускаем .htaccess
+            
             // ключ на основе даты модификации файла чтобы потом отсортировать 
             // будут последние изменения вверху
             $k = $info->getMTime() . ' ' . $d;
@@ -65,15 +66,15 @@ $readOnly = verifyLogin(['admin-change-files']) ? '' : ' <sup class="t-red600">r
         <?php foreach ($arrayFiles as $file) : ?>
             <div class="flex t90 mar5-b flex-wrap hover-bg-gray100">
                 <div class="w20-phone">
-                    <a class="im-external-link-alt icon0 pad5-rl mar5-r" href="<?= SITE_URL . $file['name'] ?>" target="_blank"></a>
+                    <!-- <a class="im-external-link-alt icon0 pad5-rl mar5-r" href="<?= SITE_URL . $file['name'] ?>" target="_blank"></a> -->
                     <span x-data="{file: '<?= encodeURL64($file['name']) ?>'}" @click="
                 if (confirm('Delete file <?= $file['name'] ?>?')) {
                     document.location.href = '<?= SITE_URL ?>admin/uploaded/delete/' + file;
                 }" class="im-times icon0 pad10-rl t-gray200 hover-t-red600 cursor-pointer" title="Delete file"></span>
                 </div>
 
-                <div class="flex-grow5 w80-phone pad20-rl t-gray600 t-mono">
-                    <?= str_replace($file['basename'], '<span class="t-blue600">' . $file['basename'] . '</span>', $file['name']) ?>
+                <div class="flex-grow5 w80-phone pad20-rl t-mono">
+                    <a class="t-gray600 hover-t-blue600" href="<?= SITE_URL . $file['name'] ?>" target="_blank"><?= str_replace($file['basename'], '<span class="t-blue600">' . $file['basename'] . '</span>', $file['name']) ?></a>
                 </div>
                 <div class="t-right t-gray500"><?= $file['time'] ?></div>
                 <div class="w100px t-right t-gray500 pad5-r"><?= $file['size'] ?></div>

@@ -10,8 +10,7 @@ layout: admin/core/_layout.php
 parser: -
 protect-pre: 0
 compress: 0
-head[]: <style>[x-cloak]{display: none}</style>
-head[]: <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"></script>
+head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
 
  **/
 
@@ -29,7 +28,7 @@ if ($segmentFile) {
     if ($fileEdit and file_exists(BASE_DIR . $fileEdit)) {
         // есть такой файл
         require __DIR__ . '/_edit-editor.php'; // редактор файла
-        
+
         return; // выходим
     }
 }

@@ -23,10 +23,9 @@ if ($user = getUser()) {
     // возможно уже есть залогиненность, но без разрешения
     if ($user = getUser(true)) {
         echo '<div class="mar30-tb t-center"><a class="button button1" href="' . SITE_URL . 'admin/logout">Logout (' . $user . ')</a></div>';
-        
+
         return;
     }
-    
 }
 
 ?>
@@ -39,36 +38,38 @@ if ($user = getUser()) {
 
 
         <div class="t-red t90"><?php
-            if (isset($errors)) {
-                echo '<ul><li>' . implode('<li>', $errors) . '</li></ul>';
-            }
-        ?></div>
+                                if (isset($errors)) {
+                                    echo '<ul><li>' . implode('<li>', $errors) . '</li></ul>';
+                                }
+                                ?></div>
 
         <form method="POST">
             <?php
-                if (!isset($_SESSION['loginFormReferer']) and isset($_SERVER['HTTP_REFERER'])) {
-                    $referer = $_SERVER['HTTP_REFERER'];
+            if (!isset($_SESSION['loginFormReferer']) and isset($_SERVER['HTTP_REFERER'])) {
+                $referer = $_SERVER['HTTP_REFERER'];
 
-                    if (strpos($referer, SITE_URL) === 0) 
-                        $_SESSION['loginFormReferer'] = str_replace(SITE_URL, '', $referer);
-                }
-                
-                if (isset($_SESSION['loginFormReferer'])) {
-                    if ($_SESSION['loginFormReferer'] == 'admin/login' or
-                        $_SESSION['loginFormReferer'] == 'admin/logout')
-                        
-                        $_SESSION['loginFormReferer'] = 'admin';
-                }
+                if (strpos($referer, SITE_URL) === 0)
+                    $_SESSION['loginFormReferer'] = str_replace(SITE_URL, '', $referer);
+            }
+
+            if (isset($_SESSION['loginFormReferer'])) {
+                if (
+                    $_SESSION['loginFormReferer'] == 'admin/login' or
+                    $_SESSION['loginFormReferer'] == 'admin/logout'
+                )
+
+                    $_SESSION['loginFormReferer'] = 'admin';
+            }
             ?>
 
             div(flex flex-vcenter)
-                <i class="im-user1 t-gray400"></i>
-                <input class="form-input w100" type="text" name="username" placeholder="username..." required>
+            <i class="im-user1 t-gray400"></i>
+            <input class="form-input w100" type="text" name="username" placeholder="username..." required>
             /div
 
             div(mar20-t flex flex-vcenter)
-                <i class="im-hashtag t-gray400"></i>
-                <input class="form-input w100" type="password" name="password" placeholder="password..." required>
+            <i class="im-hashtag t-gray400"></i>
+            <input class="form-input w100" type="password" name="password" placeholder="password..." required>
             /div
 
             __(mar20-t) <button class="button button1 im-sign-in-alt w100" type="submit">Login</button>
