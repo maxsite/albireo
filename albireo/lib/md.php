@@ -25,8 +25,13 @@ function md($text)
         return $text; 
     
     $Parsedown = new Parsedown();
-
-    return $Parsedown->text($text);
+	
+	// костыль для нормальной обработки <!DOCTYPE HTML> в этом парсере 
+	$text = str_replace('<!DOCTYPE HTML>', '<!-- <!DOCTYPE HTML> -->', $text);
+	$text = $Parsedown->text($text);
+	$text = str_replace('<!-- <!DOCTYPE HTML> -->', '<!DOCTYPE HTML>', $text);
+	
+    return $text;
 }
 
 # end of file
