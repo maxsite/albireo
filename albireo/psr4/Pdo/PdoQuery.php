@@ -15,10 +15,17 @@
  * Pdo\PdoQuery::execute($db, $sql, $vars);
  * 
  * # free sql-query (no prepare data)
- * Pdo\PdoQuery::query($db, 'SELECT ...');
+ * $result = Pdo\PdoQuery::query($db, 'SELECT ...');
  *  
- * # insert
+ * # insert (with PDO prepare)
  * Pdo\PdoQuery::insert($db,  'mytable', ['field1' => $value1, 'field2' => $value2]);
+ * 
+ * # insertSql («pure» SQL)
+ * Pdo\PdoQuery::insertSql($db, 'mytable', [
+ *     'field1' => "'string value'", 
+ *     'field2' => "datetime('now', 'localtime')",
+ *     'field3' => 1,
+ * ]);
  * 
  * # update
  * Pdo\PdoQuery::update($db, 'mytable', ['password'], ['id' => $id, 'password' => $password], 'id = :id');
@@ -28,8 +35,8 @@
  * 
  * # tableExists
  * if (!Pdo\PdoQuery::tableExists($db, 'mytable')) {
- *	    $sql = 'CREATE TABLE mytable (id INTEGER PRIMARY KEY AUTOINCREMENT, ... );';
- *	    Pdo\PdoQuery::query($db, $sql);
+ *      $sql = 'CREATE TABLE mytable (id INTEGER PRIMARY KEY AUTOINCREMENT, ... );';
+ *      Pdo\PdoQuery::query($db, $sql);
  * }
  * 
  * # drop table
@@ -54,6 +61,10 @@
  *  
  *   $rows = Pdo\PdoQuery::fetchAll($db, 'SELECT * FROM mytable LIMIT ' . $limit . ' OFFSET ' . $pag['offset']);
  * 
+ * # вывод полученных записей в виде таблицы
+ *   $rows = Pdo\PdoQuery::fetchAll( ... );
+ *   echo Pdo\PdoQuery::outTableRows($rows);
+ * 
  */
 
 namespace Pdo;
@@ -68,7 +79,7 @@ class PdoQuery
      */
     public static function showMessage(string $message)
     {
-        echo '<div class="pad10 bg-red700 t90 t-white t-center"><i class="im-exclamation-triangle"></i>' . $message . '</div>';
+        echo '<div class="pad10 mar10-tb bg-red700 t90 t-white t-center"><i class="im-exclamation-triangle"></i>' . $message . '</div>';
     }
 
     public static function execute(\PDO $db, string $sql, array $bindValue = [])
@@ -77,7 +88,7 @@ class PdoQuery
             $sth = $db->prepare($sql); //, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY)
             return $sth->execute($bindValue);
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (execute): ' . $e->getMessage());
             return false;
         }
     }
@@ -87,7 +98,7 @@ class PdoQuery
         try {
             return $db->query($sql);
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (query): ' . $e->getMessage());
             return false;
         }
     }
@@ -99,7 +110,7 @@ class PdoQuery
             $sth->execute($bindValue);
             return $sth->fetchAll();
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (fetchAll): ' . $e->getMessage());
             return false;
         }
     }
@@ -124,10 +135,29 @@ class PdoQuery
             $sth = $db->prepare($sql);
             return $sth->execute($vars);
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (insert): ' . $e->getMessage());
             return false;
         }
     }
+
+    public static function insertSql(\PDO $db, string $table, array $data)
+    {
+        $skey =  $sval = '';
+        $vars = [];
+
+        foreach ($data as $key => $val) {
+            $skey .= $key . ', ';
+            $sval .= $val . ', ';
+        }
+
+        $skey = rtrim(trim($skey), ',');
+        $sval = rtrim(trim($sval), ',');
+
+        $sql = 'INSERT INTO ' . $table . ' (' . $skey . ') VALUES (' . $sval . ');';
+        
+        return self::query($db, $sql);
+    }
+
 
     public static function update(\PDO $db, string $table, array $updateField, array $data, $where = '')
     {
@@ -152,7 +182,7 @@ class PdoQuery
             $sth = $db->prepare($sql);
             return $sth->execute($vars);
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (update): ' . $e->getMessage());
             return false;
         }
     }
@@ -167,7 +197,7 @@ class PdoQuery
             $sth = $db->prepare($sql);
             return $sth->execute($bindValue);
         } catch (\PDOException $e) {
-            self::showMessage('Error: ' . $e->getMessage());
+            self::showMessage('Error (delete): ' . $e->getMessage());
             return false;
         }
     }
@@ -204,6 +234,40 @@ class PdoQuery
             'max' => $max, // всего станиц пагинации
         ];
     }
+    
+    public static function outTableRows(array $rows, $classTable = 't90 table-striped table-hover')
+    {
+        $out = ''; // итоговый вывод
+
+        // формируем таблицу
+        foreach ($rows as $n => $row) {
+            $out .= '<tr>';
+                
+            foreach($row as $r) {
+                $out .= '<td>' . htmlspecialchars($r) . '</td>';
+            }
+
+            $out .= '</tr>';
+        }
+        
+        $header = ''; // заголовки — названия полей
+        
+        // названия полей у всех едины, поэтому берём из первого элемента
+        if (isset($rows[0]) and $rows[0]) {
+            $headers = array_keys($row);
+            
+            foreach($headers as $r) {
+                $header .= '<th>' . htmlspecialchars($r) . '</th>';
+            }
+            
+            $header = '<thead><tr>' . $header . '</tr></thead>';
+        }
+        
+        $out = '<div class="overflow-x-auto"><table class="' . $classTable . '">' . $header . $out . '</table></div>';
+        
+        return $out;
+    }
+    
 }
 
 # end of file
