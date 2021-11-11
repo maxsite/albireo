@@ -4,6 +4,14 @@
  */
 
 /**
+ * Начальное время для получения статистики
+ * 
+ * Узнать затраченное время:
+ * $time = number_format(microtime(true) - ALBIREO_TIME_START, 6) . 'sec';
+ */
+define('ALBIREO_TIME_START', microtime(true));
+
+/**
  * Добавить данные во flash-сессию
  * https://maxsite.org/page/php-flash-message
  * 
@@ -317,22 +325,30 @@ function pageOut()
  */
 function processingContent(string $content, array $pageData)
 {
-    // если указан парсер
+    // если указан парсер парсеров может быть несколько через пробел
     // чтобы отключить парсер можно указать «-» (минус)
     if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
-        $parser = $pageData['parser']; // название парсера
-        $parserFile = SYS_DIR . 'lib/' . $parser . '.php'; // файл парсера
+        
+        $parsers = $pageData['parser']; // название парсеров
+        
+        $parsers = explode(' ', $parsers); // список в массив
+        $parsers = array_map('trim', $parsers); // обрежем пробелы
 
-        if (file_exists($parserFile))
-            require_once $parserFile; // подключили файл
+        // проходимся по ним
+        foreach ($parsers as $parser) {
+            $parserFile = SYS_DIR . 'lib/' . $parser . '.php'; // файл парсера
 
-        if (function_exists($parser))
-            $content = $parser($content); // обработали текст через функцию парсера
+            if (file_exists($parserFile))
+                require_once $parserFile; // подключили файл
+
+            if (function_exists($parser))
+                $content = $parser($content); // обработали текст через функцию парсера
+        }
     }
 
     // Содержимое PRE и CODE можно заменить на html-сущности
     if (isset($pageData['protect-pre']) and $pageData['protect-pre']) {
-        $content = protectHTMLCode($content);
+        $content = protectHTMLCode($content, $pageData['protect-pre']);
     }
 
     // произвольные php-функции для обработки контента
@@ -845,20 +861,25 @@ function storage(bool $set, string $key, $value, $default)
 /**
  * Преобразуем текст тэгов PRE и CODE в html-сущности
  * @param $text - входящий текст
+ * @param $mode - режим замены 1 - <PRE> и <CODE>, 2 - только <PRE>, 3 - только <CODE>
  */
-function protectHTMLCode(string $text)
+function protectHTMLCode(string $text, $mode = '1')
 {
-    $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
-        $t = htmlspecialchars($m[2]); // в html-сущности
-        $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
-        return $m[1] . $t . $m[3];
-    }, $text);
-
-    $text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', function ($m) {
-        $t = htmlspecialchars($m[2]);
-        $t = str_replace('&amp;', '&', $t);
-        return $m[1] . $t . $m[3];
-    }, $text);
+    if ($mode == '1' or $mode == '2') {
+        $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
+            $t = htmlspecialchars($m[2]); // в html-сущности
+            $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
+            return $m[1] . $t . $m[3];
+        }, $text);
+    }
+    
+    if ($mode == '1' or $mode == '3') {
+        $text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', function ($m) {
+            $t = htmlspecialchars($m[2]);
+            $t = str_replace('&amp;', '&', $t);
+            return $m[1] . $t . $m[3];
+        }, $text);
+    }
 
     return $text;
 }
