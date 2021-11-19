@@ -6,6 +6,7 @@ description: Примеры работы с SQLite в Albireo
 slug: sqlite
 slug-static: -
 sitemap: -
+body: class="pad50-rl"
 
 **/
 
@@ -13,6 +14,7 @@ sitemap: -
 
 <h1 class="t-center mar50-t">Примеры работы с SQLite в Albireo</h1>
 <h6 class="t-center">см. файл <i>albireo-data/pages/sample/sqlite.php</i></h6>
+<h6 class="t-center">Cм. описание <a href="https://maxsite.org/page/sqlite-php">https://maxsite.org/page/sqlite-php</a></h6>
 
 <?php
 
@@ -95,10 +97,10 @@ Pdo\PdoQuery::insert($db,  'myPages', [
 // обновим данные 10-й записи (указывается в id)
 Pdo\PdoQuery::update($db, 'myPages',
     [ // какие поля нужно обновить
-		'title',
-		'content',
-		'level'
-	],
+        'title',
+        'content',
+        'level'
+    ],
     [ // данные для этих полей
         'id' => 10, // используется во WHERE
         'title' => '10-я запись',
@@ -120,7 +122,7 @@ echo '<p class="mar20-tb">Всего записей: ' . Pdo\PdoQuery::countReco
 
 // сделаем выборку по условиям через PDO prepare
 $id = 7;
-$rows = Pdo\PdoQuery::fetchAll($db, 'SELECT * FROM myPages WHERE id = :id', ['id' => $id]);
+$rows = Pdo\PdoQuery::fetchAll($db, 'SELECT * FROM myPages WHERE id = :id', [':id' => $id]);
 
 // выведем на экран результат
 echo Pdo\PdoQuery::outTableRows($rows);
@@ -141,9 +143,75 @@ $rows = Pdo\PdoQuery::query($db, 'SELECT id, title FROM myPages WHERE id > 2 AND
 echo '<br>';
 
 foreach($rows as $row) {
-	echo '<p>' . $row['id'] . ' : ' . htmlspecialchars($row['title']) . '</p>';
+    echo '<p>' . $row['id'] . ' : ' . htmlspecialchars($row['title']) . '</p>';
 
-	// pr($row); // для отладки
+    // pr($row); // для отладки
+}
+
+// использование \PDO->bindValue() и \PDO->prepare()
+$id = 8;
+
+try {
+	$sth = $db->prepare('SELECT * FROM myPages WHERE id = :id'); // готовим sql-запрос
+	$sth->bindValue(':id', $id, \PDO::PARAM_INT); // привязываем параметры
+	$sth->execute(); // выполняем запрос
+	$rows = $sth->fetchAll(); // получаем результат
+ 
+	echo Pdo\PdoQuery::outTableRows($rows);// выводим для контроля
+} catch (\PDOException $e) {
+	echo $e->getMessage();
+}
+
+
+// этот же вариант с помощью fetchAll()
+$id = 1;
+
+$rows = Pdo\PdoQuery::fetchAll($db, 
+	'SELECT * FROM myPages WHERE id = :id', // sql-запрос
+	[':id' => $id], // параметры
+	[':id' => \PDO::PARAM_INT] // типы параметров
+);
+
+echo Pdo\PdoQuery::outTableRows($rows);
+
+echo '<h2 class="mar50-t">Пример пагинации</h2>';
+
+// пример пагинации
+// просто в качестве демо-примера
+// адрес?page=7 — номер пагинации
+
+$currentUrl = getVal('currentUrl'); // текущий адрес
+$current = (int) ($currentUrl['queryData']['page'] ?? 1); // текущая страница пагинации
+
+if ($current < 1) $current = 1; // исправим, если нужно
+		
+$limit = 3; // записей на одну страницу пагинации
+
+$pag = Pdo\PdoQuery::getPagination($db, 'myPages', $limit, $current); // массив данных
+ 
+// используем в запросе 
+$rows = Pdo\PdoQuery::fetchAll($db, 'SELECT * FROM myPages LIMIT :limit OFFSET :offset', [':limit' => $pag['limit'], ':offset' => $pag['offset']]);
+
+echo Pdo\PdoQuery::outTableRows($rows);
+
+// блок ссылок для пагинации
+if ($pag['max'] > 1) {
+	echo '<div class="mar30-tb">';
+
+	for ($i = 1; $i <= $pag['max']; $i++) {
+		if ($i > 1)
+			$queryUrl = $currentUrl['urlFull'] . '?page=' . $i;
+		else 
+			$queryUrl = $currentUrl['urlFull'];
+
+		if ($i == $current)
+			echo '<span class="pad10-rl pad5-tb mar5-r bg-teal600 t-white" style="cursor: default">' . $i . '</span>';		
+		else			
+			echo '<a class="pad10-rl pad5-tb mar5-r hover-no-underline bg-teal100 hover-bg-teal700 hover-t-teal50" href="' . $queryUrl . '">' . $i . '</a>';
+		
+	}
+
+	echo '</div>';
 }
 
 

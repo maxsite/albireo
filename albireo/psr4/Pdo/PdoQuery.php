@@ -4,52 +4,52 @@
  * (c) Albireo Framework, https://maxsite.org/albireo, 2021
  *
  * PdoQuery
- * 
+ *
  * # fetchAll — return all records in array
  * $sql = 'SELECT name, colour, calories FROM mytable WHERE calories < :calories AND colour = :colour';
  * $vars = [':calories' => 150, ':colour' => 'red'];
  * $rows = Pdo\PdoQuery::fetchAll($db, $sql, $vars);
  * foreach($rows as $row) { ... }
- * 
+ *
  * # execute with prepare data
  * Pdo\PdoQuery::execute($db, $sql, $vars);
- * 
+ *
  * # free sql-query (no prepare data)
  * $result = Pdo\PdoQuery::query($db, 'SELECT ...');
- *  
+ *
  * # insert (with PDO prepare)
  * Pdo\PdoQuery::insert($db,  'mytable', ['field1' => $value1, 'field2' => $value2]);
- * 
+ *
  * # insertSql («pure» SQL)
  * Pdo\PdoQuery::insertSql($db, 'mytable', [
- *     'field1' => "'string value'", 
+ *     'field1' => "'string value'",
  *     'field2' => "datetime('now', 'localtime')",
  *     'field3' => 1,
  * ]);
- * 
+ *
  * # update
  * Pdo\PdoQuery::update($db, 'mytable', ['password'], ['id' => $id, 'password' => $password], 'id = :id');
- * 
+ *
  * # delete
  * Pdo\PdoQuery::delete($db, 'mytable', 'user_id = :id', [':id' => $userId]);
- * 
+ *
  * # tableExists
  * if (!Pdo\PdoQuery::tableExists($db, 'mytable')) {
  *      $sql = 'CREATE TABLE mytable (id INTEGER PRIMARY KEY AUTOINCREMENT, ... );';
  *      Pdo\PdoQuery::query($db, $sql);
  * }
- * 
+ *
  * # drop table
  * Pdo\PdoQuery::dropTable($db, 'mytable');
- * 
+ *
  * # All Count record
  * $allCountRecord = Pdo\PdoQuery::countRecord($db, 'mytable');
- * 
+ *
  * # пагинация
  *   $current = 1; // номер текущй страницы пагинации начиная с 1
  *   $limit = 10; // записей на одну страницу пагинации
  *   $pag = Pdo\PdoQuery::getPagination($db, 'mytable', $limit, $current);
- *  
+ *
  *   Array
  *   (
  *      [limit] => 10 - записей на одну страницу пагинации
@@ -58,13 +58,13 @@
  *      [current] => 8 - текущая страница пагинации
  *      [max] => 9 - всего страниц пагинации
  *   )
- *  
+ *
  *   $rows = Pdo\PdoQuery::fetchAll($db, 'SELECT * FROM mytable LIMIT ' . $limit . ' OFFSET ' . $pag['offset']);
- * 
+ *
  * # вывод полученных записей в виде таблицы
  *   $rows = Pdo\PdoQuery::fetchAll( ... );
  *   echo Pdo\PdoQuery::outTableRows($rows);
- * 
+ *
  */
 
 namespace Pdo;
@@ -73,7 +73,7 @@ class PdoQuery
 {
     /**
      * Show message
-     * 
+     *
      * @param string $message
      * @return void
      */
@@ -103,11 +103,29 @@ class PdoQuery
         }
     }
 
-    public static function fetchAll(\PDO $db, string $sql, array $bindValue = [])
+    public static function sthBindValueType($sth, array $bindValue, array $bindValueType)
+    {
+        foreach($bindValue as $key => $val) {
+            if (isset($bindValueType[$key])) {
+                $sth->bindValue($key, $val, $bindValueType[$key]);
+            }
+        }
+
+        return $sth;
+    }
+
+    public static function fetchAll(\PDO $db, string $sql, array $bindValue = [], array $bindValueType = [])
     {
         try {
             $sth = $db->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
-            $sth->execute($bindValue);
+
+            if ($bindValueType) {
+                $sth = self::sthBindValueType($sth, $bindValue, $bindValueType);
+                $sth->execute();
+            } else {
+                $sth->execute($bindValue);
+            }
+
             return $sth->fetchAll();
         } catch (\PDOException $e) {
             self::showMessage('Error (fetchAll): ' . $e->getMessage());
@@ -154,7 +172,7 @@ class PdoQuery
         $sval = rtrim(trim($sval), ',');
 
         $sql = 'INSERT INTO ' . $table . ' (' . $skey . ') VALUES (' . $sval . ');';
-        
+
         return self::query($db, $sql);
     }
 
@@ -234,7 +252,7 @@ class PdoQuery
             'max' => $max, // всего станиц пагинации
         ];
     }
-    
+
     public static function outTableRows(array $rows, $classTable = 't90 table-striped table-hover')
     {
         $out = ''; // итоговый вывод
@@ -242,32 +260,32 @@ class PdoQuery
         // формируем таблицу
         foreach ($rows as $n => $row) {
             $out .= '<tr>';
-                
+
             foreach($row as $r) {
                 $out .= '<td>' . htmlspecialchars($r) . '</td>';
             }
 
             $out .= '</tr>';
         }
-        
+
         $header = ''; // заголовки — названия полей
-        
+
         // названия полей у всех едины, поэтому берём из первого элемента
         if (isset($rows[0]) and $rows[0]) {
             $headers = array_keys($row);
-            
+
             foreach($headers as $r) {
                 $header .= '<th>' . htmlspecialchars($r) . '</th>';
             }
-            
+
             $header = '<thead><tr>' . $header . '</tr></thead>';
         }
-        
+
         $out = '<div class="overflow-x-auto"><table class="' . $classTable . '">' . $header . $out . '</table></div>';
-        
+
         return $out;
     }
-    
+
 }
 
 # end of file
