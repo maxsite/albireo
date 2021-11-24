@@ -4,6 +4,7 @@
 title: @blocks-save-ajax
 slug: admin/blocks/1
 slug-pattern: admin/blocks/([0-9]+)
+slug-static: -
 method: AJAX
 layout: empty.php
 parser: -
