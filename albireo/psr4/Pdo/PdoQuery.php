@@ -18,7 +18,14 @@
  * $result = Pdo\PdoQuery::query($db, 'SELECT ...');
  *
  * # insert (with PDO prepare)
- * Pdo\PdoQuery::insert($db,  'mytable', ['field1' => $value1, 'field2' => $value2]);
+ * Pdo\PdoQuery::insert($db,  'mytable', ['field1' => $value, 'field2' => $value]);
+ * or 
+ * Pdo\PdoQuery::insert($db,  'mytable', 
+ *	['field1' => $value, 'field2' => $value],
+ *	['field1' => $value, 'field2' => $value],
+ *	['field1' => $value, 'field2' => $value],
+ * );
+ *
  *
  * # insertSql («pure» SQL)
  * Pdo\PdoQuery::insertSql($db, 'mytable', [
@@ -133,9 +140,8 @@ class PdoQuery
         }
     }
 
-    public static function insert(\PDO $db, string $table, array $data)
-    {
-        $skey =  $sval = '';
+	private static function _insertOne(\PDO $db, string $table, array $data) {
+		$skey =  $sval = '';
         $vars = [];
 
         foreach ($data as $key => $val) {
@@ -156,6 +162,13 @@ class PdoQuery
             self::showMessage('Error (insert): ' . $e->getMessage());
             return false;
         }
+	}
+
+    public static function insert(\PDO $db, string $table, array ...$data)
+    {
+		foreach ($data as $elem) {
+			self::_insertOne($db, $table, $elem);
+		}
     }
 
     public static function insertSql(\PDO $db, string $table, array $data)
@@ -253,8 +266,11 @@ class PdoQuery
         ];
     }
 
-    public static function outTableRows(array $rows, $classTable = 't90 table-striped table-hover')
+    public static function outTableRows($rows, $classTable = 't90 table-striped table-hover')
     {
+		// если это не массив, то выходим (может быть ошибка)
+		if (!is_array($rows)) return '';
+		
         $out = ''; // итоговый вывод
 
         // формируем таблицу
