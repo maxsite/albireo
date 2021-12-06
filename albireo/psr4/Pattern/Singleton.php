@@ -6,14 +6,14 @@
 
 /**
  * Design pattern "Singleton" (Creational)
- * 
+ *
  * class MyClass
  * {
  *      use Pattern\Singleton;
- * 
+ *
  *      ...
  * }
- * 
+ *
  * $m = MyClass::getInstance();
  * $m->...
  */
@@ -31,7 +31,7 @@ trait Singleton
 		return self::$instance;
 	}
 
-	private function __construct()
+	protected function __construct()
 	{
 	}
 

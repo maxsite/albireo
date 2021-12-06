@@ -17,7 +17,7 @@ if (!defined('SITE_PROTOCOL')) {
     unset($protocol);
 }
 
-// опоеделяем http-хост
+// определяем http-хост
 if (!defined('SITE_HOST')) {
     $host = rtrim($_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/');
     define('SITE_HOST', $host);
@@ -35,7 +35,7 @@ if (!defined('LAYOUT_DIR')) define('LAYOUT_DIR', DATA_DIR . 'layout' . DIRECTORY
 if (!defined('SNIPPETS_DIR')) define('SNIPPETS_DIR', DATA_DIR . 'snippets' . DIRECTORY_SEPARATOR);
 if (!defined('STATIC_EXT')) define('STATIC_EXT', '');
 
-// в зависисмости от режима, подключаем разные файлы
+// в зависимости от режима, подключаем разные файлы
 if (defined('GENERATE_STATIC'))
     require SYS_DIR . 'generation.php';
 else

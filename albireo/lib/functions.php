@@ -5,7 +5,7 @@
 
 /**
  * Начальное время для получения статистики
- * 
+ *
  * Узнать затраченное время:
  * $time = number_format(microtime(true) - ALBIREO_TIME_START, 6) . 'sec';
  */
@@ -14,7 +14,7 @@ define('ALBIREO_TIME_START', microtime(true));
 /**
  * Добавить данные во flash-сессию
  * https://maxsite.org/page/php-flash-message
- * 
+ *
  * @param string $key - ключ
  * @param $val - данные
  */
@@ -45,14 +45,14 @@ function sessionFlashGet(string $key)
  * @param array $DATA - данные, которые будут доступны в файле в виде переменных
  * @param boolean $showError - отображать ли ошибки в файле шаблона
  * @return string
- * 
+ *
  * <?= tpl(__DIR__ . '/my-block.php', ['header' => 'Hello!']) ?>
- * 
+ *
  * В файле шаблона можно использовать обычный php-код, а таже замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
- * 
+ *
  * Также будет доступна переменная $DATA (исходный массив данных)
  */
 function tpl(string $FILE, array $DATA = [], bool $showError = true)
@@ -76,7 +76,7 @@ function tpl(string $FILE, array $DATA = [], bool $showError = true)
  * @param boolean $_showError - отображать ли ошибки в файле шаблона
  * @param boolean $FILE - имя файла для вывода в ошибках
  * @return string
- * 
+ *
  * В тексте можно использовать обычный php-код, а таже замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
@@ -377,7 +377,7 @@ function processingContent(string $content, array $pageData)
  * @param $before - приставка к результату, если он есть
  * @param $after - корень к результату, если он есть
  */
-function getPageData(string $key,  $default = '', $before = '', $after = '')
+function getPageData(string $key, $default = '', $before = '', $after = '')
 {
     $pageData = getVal('pageData');
 
@@ -395,9 +395,9 @@ function getPageData(string $key,  $default = '', $before = '', $after = '')
  * @param $before - приставка к результату, если он есть
  * @param $after - корень к результату, если он есть
  */
-function getPageDataHtml(string $key,  $default = '', $before = '', $after = '')
+function getPageDataHtml(string $key, $default = '', $before = '', $after = '')
 {
-    return htmlspecialchars(getPageData($key,  $default, $before, $after));
+    return htmlspecialchars(getPageData($key, $default, $before, $after));
 }
 
 /**
@@ -474,7 +474,7 @@ function matchUrlPage()
     }
 
     // если ничего не найдено, отдаём файл 404-страницы
-    if (!$result and file_exists(DATA_DIR . '404.php')) $result =  DATA_DIR . '404.php';
+    if (!$result and file_exists(DATA_DIR . '404.php')) $result = DATA_DIR . '404.php';
 
     // сохраним в хранилище имя файла
     setVal('pageFile', $result);
@@ -562,7 +562,7 @@ function getCurrentUrl()
 function readPages()
 {
     // смотрим кэш, если есть, отдаем из него
-    if ($cache = getCache('pagesinfo.txt')) {
+    if ($cache = getCache('pagesinfo')) {
         setVal('pagesInfo', $cache); // сохраняем массив в хранилище
         return; // и выходим
     }
@@ -655,7 +655,7 @@ function readPages()
                 $parts = pathinfo($f);
 
                 // берём только путь и имя файла без расширения
-                $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
+                $slug = $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
 
                 // делаем замены слэшей на URL
                 $slug = str_replace(['.\\', './', '\\'], ['', '', '/'], $slug);
@@ -673,7 +673,7 @@ function readPages()
     // сохраняем данные в кэше — файл pagesinfo.txt
     // данные серилизуем
 
-    setCache('pagesinfo.txt', $pagesInfo);
+    setCache('pagesinfo', $pagesInfo);
 }
 
 /**
@@ -718,6 +718,7 @@ class PageSortedIterator extends SplHeap
             $this->insert($item);
         }
     }
+
     public function compare($b, $a): int
     {
         return strcmp($a->getRealpath(), $b->getRealpath());
@@ -731,7 +732,11 @@ class PageSortedIterator extends SplHeap
  **/
 function setCache(string $file, $data)
 {
-    file_put_contents(CACHE_DIR . $file, serialize($data));
+    $cacheType = getConfig('cache');
+    /** @var \Cache\Base $driver */
+    $driver = "\Cache\\" . getConfig('stores')[$cacheType]['driver'];
+    $cache = $driver::getInstance();
+    return $cache->setCache($file, $data);
 }
 
 
@@ -745,87 +750,69 @@ function getCache(string $file)
     // если в конфигурации ключ noCache = true, то кэш отключаем (режим отладки)
     if (getConfig('noCache', false)) return false;
 
-    if (file_exists(CACHE_DIR . $file)) {
-        // проверим не устарел ли кэш
+    $cacheType = getConfig('cache');
+    /** @var \Cache\Base $driver */
+    $driver = "\Cache\\" . getConfig('stores')[$cacheType]['driver'];
+    $cache = $driver::getInstance();
 
-        // имя файла snapshot формируем динамически с привязкой к файлу кэша
-        $snapshotFN = 'snapshot' . crc32($file) . '.txt';
+    // проверим не устарел ли кэш
 
-        // смотрим когда было последнее обращение к этому snapshot
-        // он хранится в файле lastXXX.txt
-        // если текущая дата отличается от времени в last больше чем на cacheTimeL1 секунд,
-        // то проверим snapshot как обычно
-        // если разница меньше, то считаем, что кэш не устарел и отдаём его без проверки snapshot
-        // время указывается в конфигурации сайта в ключе cacheTimeL1 в секундах
-        // это позволяет уменьшить количество обращений к диску при большом количестве http-запросов
+    // имя файла snapshot формируем динамически с привязкой к файлу кэша
+    $snapshotFN = 'snapshot';
 
-        // время по умолчанию 10 секунд
-        $cacheTimeL1 = (int) getConfig('cacheTimeL1', 10);
+    // смотрим когда было последнее обращение к этому snapshot
+    // он хранится в файле lastXXX.txt
+    // если текущая дата отличается от времени в last больше чем на cacheTimeL1 секунд,
+    // то проверим snapshot как обычно
+    // если разница меньше, то считаем, что кэш не устарел и отдаём его без проверки snapshot
+    // время указывается в конфигурации сайта в ключе cacheTimeL1 в секундах
+    // это позволяет уменьшить количество обращений к диску при большом количестве http-запросов
 
-        // имя файла last формируем динамически с привязкой к файлу кэша
-        $lastFN = 'last' . crc32($file) . '.txt';
-        $lastOld = 0; // здесь будет время из этого файла
+    // время по умолчанию 10 секунд
+    $cacheTimeL1 = (int)getConfig('cacheTimeL1', 10);
 
-        if ($cacheTimeL1 > 0 and file_exists(CACHE_DIR . $lastFN)) {
-            // загрузили содержимое
-            $lastOld = file_get_contents(CACHE_DIR . $lastFN);
+    // имя файла last формируем динамически с привязкой к файлу кэша
+    $lastFN = 'last';
+    $lastOld = 0; // здесь будет время из этого файла
 
-            // взяли время в last-файле
-            // обратная серилизация с @подавлением ошибок
-            $lastOld = @unserialize($lastOld);
-        }
 
-        if (time() - $lastOld > $cacheTimeL1) {
-            // кэш snapshot возможно устарел, требуется проверка
-
-            // смотрим «снимок» каталогов, включая DATA_DIR
-            // это позволяет отслеживать все изменения
-            $addDirs = array_merge([DATA_DIR], getConfig('dirsForPages', []));
-            $snapshot = getSnapshot($addDirs); // текущий «снимок»
-
-            // сравниваем старый (из кэша) и новый «снимки»
-
-            // получаем CRC32 полином
-            $snapshot = crc32($snapshot);
-
-            // старый берём из файла кэша
-            if (file_exists(CACHE_DIR . $snapshotFN)) {
-                // загрузили содержимое
-                $snapshotOld = file_get_contents(CACHE_DIR . $snapshotFN);
-
-                // обратная серилизация с @подавлением ошибок
-                $snapshotOld = @unserialize($snapshotOld);
-            } else {
-                $snapshotOld = 0;
-            }
-
-            // обновляем время построения текущего «снимка»
-            setCache($lastFN, time());
-
-            // если они не равны, то кэш невалидный
-            if ($snapshot != $snapshotOld) {
-                // сохраняем в кэше новый
-                setCache($snapshotFN, $snapshot);
-
-                // кэш невалидный, выходим
-                return false;
-            }
-        }
-
-        // если всё, ок, то отдаём кэш из файла
-        $content = file_get_contents(CACHE_DIR . $file); // загрузили содержимое
-
-        // обратная серилизация с @подавлением ошибок
-        $content = @unserialize($content);
-
-        if ($content)
-            return $content; // если есть что отдавать
-        else
-            return false;
-    } else {
-        // файла кэша вообще нет
-        return false;
+    if ($cacheTimeL1 > 0) {
+        // загрузили содержимое
+        $lastOld = $cache->getCache($lastFN);
     }
+
+    if (time() - $lastOld > $cacheTimeL1) {
+        // кэш snapshot возможно устарел, требуется проверка
+
+        // смотрим «снимок» каталогов, включая DATA_DIR
+        // это позволяет отслеживать все изменения
+        $addDirs = array_merge([DATA_DIR], getConfig('dirsForPages', []));
+        $snapshot = getSnapshot($addDirs); // текущий «снимок»
+
+        // сравниваем старый (из кэша) и новый «снимки»
+
+        // получаем CRC32 полином
+        $snapshot = crc32($snapshot);
+
+        // старый берём из файла кэша
+        $snapshotOld = $cache->getCache($snapshotFN) ?? 0;
+
+        // обновляем время построения текущего «снимка»
+        setCache($lastFN, time());
+
+        // если они неравны, то кэш невалидный
+        if ($snapshot != $snapshotOld) {
+
+            $cache->flush();
+            // сохраняем в кэше новый
+            setCache($snapshotFN, $snapshot);
+
+            // кэш невалидный, выходим
+            return false;
+        }
+    }
+
+    return $cache->getCache($file);
 }
 
 /**
@@ -833,7 +820,7 @@ function getCache(string $file)
  * @param array $dirs - каталоги
  * @return string
  */
-function getSnapshot(array $dirs)
+function getSnapshot(array $dirs): string
 {
     $snapshot = '';
 
@@ -1001,15 +988,15 @@ function pr($var, $html = true, $echo = true)
  * Используется для классов вне PSR-4
  * @param string $class — имя класса
  * @param string $path — полный путь к файлу или каталогу
- * 
+ *
  * addClassmap('log\Model', __DIR__ . '/Model.php');
  * $m = new log\Model;
- * 
+ *
  * addClassmap('admin\log', __DIR__);
  * $m = new admin\log\Controller; // admin/log/Controller.php
  * $m = new admin\log\Model; // admin/log/Model.php
  * $v = new admin\log\View; // admin/log/View.php
- * 
+ *
  */
 function addClassmap(string $class, string $path)
 {
@@ -1028,11 +1015,11 @@ if (file_exists(BASE_DIR . 'vendor/autoload.php')) require_once BASE_DIR . 'vend
  * Register autoload classes PSR-4
  * https://www.php-fig.org/psr/psr-4/
  * https://maxsite.org/page/php-autoload
- * 
+ *
  * Файл класса располагается в либо в albireo/psr4
  * либо в albireo-data (DATA_DIR и имеет приоритет)
  * Либо используется classmap (см. addClassmap)
- * 
+ *
  * Каталог указывает на namespace
  *
  * Пример 1
