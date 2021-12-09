@@ -1,10 +1,10 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 
 // путь к каталогу админки — работаем относительно него
-define('ADMIN_DIR', DATA_DIR . 'admin' . DIRECTORY_SEPARATOR);
+// define('ADMIN_DIR', DATA_DIR . 'admin' . DIRECTORY_SEPARATOR);
 
 // адреса админки
-define('ADMIN_URL', DATA_URL . 'admin/');
+// define('ADMIN_URL', DATA_URL . 'admin/');
 define('ADMIN_ASSETS_URL', ADMIN_URL . 'assets/');
 
 // запуск механизма сессий

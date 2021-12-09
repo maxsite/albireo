@@ -34,7 +34,7 @@ return [
         'username' => 'user',
         'password' => '123456',
         'level' => ['pages'],
-        'expiration' => mktime(0, 0, 0, 12, 1, 2021), 
+        'expiration' => mktime(0, 0, 0, 12, 1, 2030), 
     ],
     
     '3' => [
@@ -42,7 +42,7 @@ return [
         'username' => 'user1',
         'password' => '123456',
         'level' => ['secret content'],
-        'expiration' => mktime(10, 12, 0, 11, 19, 2021), 
+        'expiration' => mktime(10, 12, 0, 11, 19, 2030), 
     ],
 */
 ];

@@ -9,7 +9,7 @@ slug-static: -
 -parser: simple
 compress: 0
 layout: admin/core/_layout.php
-head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
+head[]: <script src="[admin-url]assets/alpine.min.js"></script>
 
 admin-menu[title]: ---
 admin-menu[group]: Modules

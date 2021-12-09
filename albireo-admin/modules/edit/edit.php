@@ -10,7 +10,7 @@ layout: admin/core/_layout.php
 parser: -
 protect-pre: 0
 compress: 0
-head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
+head[]: <script src="[admin-url]assets/alpine.min.js"></script>
 
  **/
 

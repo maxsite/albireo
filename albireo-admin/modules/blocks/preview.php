@@ -10,7 +10,7 @@ layout: admin/core/_layout.php
 compress: 0
 
 -parser: simple
--head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
+-head[]: <script src="[admin-url]assets/alpine.min.js"></script>
 
 admin-menu[title]: ---
 admin-menu[group]: Modules

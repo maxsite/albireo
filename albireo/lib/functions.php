@@ -185,6 +185,7 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
                 $vRepl = str_replace('[assets-url]', getConfig('assetsUrl'), $vRepl);
                 $vRepl = str_replace('[EOL]', PHP_EOL, $vRepl);
                 $vRepl = str_replace('[data-url]', DATA_URL, $vRepl);
+                $vRepl = str_replace('[admin-url]', ADMIN_URL, $vRepl);
 
                 $out[] = str_replace(['[key]', '[val]'], [$m[1], $vRepl], $format);
             } else {
@@ -245,35 +246,64 @@ function _getContentFile($fn)
  */
 function pageOut()
 {
+    // проверим существание каталога шаблона
+    if (!file_exists(getConfig('templateDir'))) {
+        echo 'Error! Template not-found... ;-(';
+        return;
+    }
+
     $pageData = getVal('pageData'); // данные страницы
 
     // у страницы может быть свой шаблон
     $layout = $pageData['layout'] ?? '';
     $mainFile = ''; // итоговый файл
 
-    if ($layout) {
-        // приоритет файла в LAYOUT_DIR
-        if (file_exists(LAYOUT_DIR . $layout)) {
-            $mainFile = LAYOUT_DIR . $layout; // есть такой файл
-        } else {
-            // возможно файл указан относительно каталога DATA_DIR
-            if (file_exists(DATA_DIR . $layout)) $mainFile = DATA_DIR . $layout;
-        }
-    }
+    // если у страницы нет параметра layout, то берём дефолтное значение
+    if (!$layout) $layout = getConfig('layout', 'main.php');
 
-    // если ничего не нашли, то используем тот, который указан в конфигурации
-    if (!$mainFile) $mainFile = LAYOUT_DIR . getConfig('layout');
+    // замена «admin/» на полный путь к файлу
+    // это нужно, чтобы обеспечить доступ к админ-панели
+    if (strpos($layout, 'admin/') === 0)
+        $layout = str_replace('admin/', ADMIN_DIR, $layout);
+
+    // проверяем существование этого файла
+    // вначале относительно текущего шаблона
+    // потом относительно DATA_DIR
+    // потом в DATA_DIR/layout/ для совместимости со строй версией Albireo
+    // и потом явно с полным путем (используется в админке)
+    if (file_exists(getConfig('templateLayoutDir') . $layout))
+        $mainFile = getConfig('templateLayoutDir') . $layout;
+    elseif (file_exists(DATA_DIR . $layout))
+        $mainFile = DATA_DIR . $layout;
+    elseif (file_exists(DATA_DIR . 'layout' . DIRECTORY_SEPARATOR . $layout))
+        $mainFile = DATA_DIR . 'layout' . DIRECTORY_SEPARATOR . $layout;
+    elseif (file_exists($layout))
+        $mainFile = $layout;
 
     // в конфигурации можно указать файл со своими функциями
     if ($functionsFile = getConfig('functions')) {
         if (file_exists($functionsFile)) require_once $functionsFile;
     }
 
+    // pr($layout); // для отладки
+    // pr($mainFile); // для отладки
+
     // если файл есть
     if ($mainFile and file_exists($mainFile)) {
         // если у страницы есть ключ init-file, то подключаем указанный файл перед шаблоном
-        if (isset($pageData['init-file']) and $pageData['init-file'] and file_exists(DATA_DIR . $pageData['init-file'])) {
-            require_once DATA_DIR . $pageData['init-file'];
+        $initFile = $pageData['init-file'] ?? '';
+
+        if ($initFile) {
+            // если указан admin/, то меняем на каталог админ-панели
+            if (strpos($initFile, 'admin/') === 0)
+                $initFile = str_replace('admin/', ADMIN_DIR, $initFile);
+
+            // проверяем файл в каталоге DATA_DIR
+            // а потом от корня сайта
+            if (file_exists(DATA_DIR . $initFile))
+                require_once DATA_DIR . $initFile;
+            elseif (file_exists($initFile))
+                require_once $initFile;
         }
 
         // у страницы может быть параметр require[] где перечислены файлы для подключения
@@ -424,6 +454,20 @@ function getConfig(string $key, $default = '')
                 $config = require CONFIG_DIR . 'config.php';
             }
         }
+
+        // автоматически добавляем данные для текущего шаблона        
+        $template = $config['template'] ?? 'default';
+        $layoutDir = $config['layoutDir'] ?? 'layout';
+
+        $config['templateDir'] = TEMPLATES_DIR . $template . DIRECTORY_SEPARATOR; // путь к шаблону
+        $config['templateURL'] = TEMPLATES_URL . $template . '/'; // URL шаблона
+        $config['templateLayoutDir'] = TEMPLATES_DIR . $template . DIRECTORY_SEPARATOR . $layoutDir . DIRECTORY_SEPARATOR; // каталог layout
+
+        // URL assets зависит от режима работы Albireo
+        if (defined('GENERATE_STATIC'))
+            $config['assetsUrl'] = $config['assets'] . '/';
+        else
+            $config['assetsUrl'] = TEMPLATES_URL . $template . '/' . $config['assets'] . '/';
     }
 
     return $config[$key] ?? $default;
@@ -572,7 +616,7 @@ function readPages()
 
     // получаем все php-файлы из указанных каталогов в конфигурации dirsForPages
     // каталоги DATA_DIR/pages и DATA_DIR/admin подключаются всегда
-    $addDirs = array_merge([DATA_DIR . 'pages', DATA_DIR . 'admin'], getConfig('dirsForPages', []));
+    $addDirs = array_merge([DATA_DIR . 'pages', ADMIN_DIR], getConfig('dirsForPages', []));
     $addFiles = _addFiles($addDirs);
 
     if ($addFiles) $allFiles = array_merge($allFiles, $addFiles);
@@ -672,7 +716,7 @@ function readPages()
 
     // сохраняем данные в кэше — файл pagesinfo.txt
     $cache = Services\Services::getInstance()->get('Cache\Cache');
-    
+
     // когда доступнен класс кэширования, сохраним
     if ($cache !== null) $cache->set('pagesinfo', $pagesInfo);
 }
@@ -727,7 +771,7 @@ class PageSortedIterator extends SplHeap
 
 /**
  * Получить данные страниц из кэша
- * Кэш устаревает когда были изменения в каталоге DATA_DIR (albireo-data/*)
+ * Кэш устаревает когда были изменения в каталоге DATA_DIR (albireo-data/*) и ADMIN_DIR
  * @param $key - имя файла в кэше без расширения
  */
 function getCachePagesInfo(string $key)
@@ -769,9 +813,9 @@ function getCachePagesInfo(string $key)
     if (time() - $lastOld > $cacheTimeL1) {
         // кэш snapshot возможно устарел, требуется проверка
 
-        // смотрим «снимок» каталогов, включая DATA_DIR
+        // смотрим «снимок» каталогов, включая DATA_DIR, ADMIN_DIR и свои каталоги
         // это позволяет отслеживать все изменения
-        $addDirs = array_merge([DATA_DIR], getConfig('dirsForPages', []));
+        $addDirs = array_merge([DATA_DIR], [ADMIN_DIR], getConfig('dirsForPages', []));
         $snapshot = getSnapshot($addDirs); // текущий «снимок»
 
         // сравниваем старый (из кэша) и новый «снимки»
@@ -1035,20 +1079,27 @@ spl_autoload_register(function ($class) {
 
     // формируем имя файла
     $fn0 = $path . DIRECTORY_SEPARATOR . $file;
+        
+    // если путь класс начинается с «admin\», то меняем его на каталог админки
+    if (strpos($fn0, 'admin' . DIRECTORY_SEPARATOR) === 0)
+        $fn0 = str_replace('admin' . DIRECTORY_SEPARATOR, ADMIN_N . DIRECTORY_SEPARATOR, $fn0);
 
     // добавляем базовый путь DATA_DIR и SYS_DIR
     $fn1 = DATA_DIR . $fn0; // путь от albireo-data/
     $fn2 = SYS_DIR . 'psr4' . DIRECTORY_SEPARATOR . $fn0; // путь от albireo/psr4/
+    $fn3 = BASE_DIR . $fn0; // путь от корня
 
     // для теста, если интересно что в итоге получается
     // pr($class); // admin\modules\options\mvc\Controller
     // pr($fn0);   // admin\modules\options\mvc\Controller.php
     // pr($fn1);   // albireo\my\albireo-data\admin\modules\options\mvc\Controller.php
     // pr($fn2);   // albireo\my\albireo\psr4\admin\modules\options\mvc\Controller.php
+    // pr($fn3);   // albireo\my\albireo\psr4\admin\modules\options\mvc\Controller.php
 
     // проверка на существование файлов и подключение
     if (file_exists($fn1)) require $fn1;
     elseif (file_exists($fn2)) require $fn2;
+    elseif (file_exists($fn3)) require $fn3;
     else {
         // проверка в classmap
         // это может быть как файл, так и каталог (равен namespace)

@@ -11,5 +11,5 @@
     <?= implode(getKeysPageData()) ?>
     <?= implode(getKeysPageData('link', '<link rel="[key]" href="[val]">')) ?>
     <?= implode(getKeysPageData('head', '[val]')) ?>
-    <?php require LAYOUT_DIR . 'doc-parts/style.php'; ?>
+    <?php require getConfig('templateLayoutDir') . 'doc-parts/style.php'; ?>
 </head>

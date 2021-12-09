@@ -1,6 +1,6 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed'); 
 
-require LAYOUT_DIR . 'doc-parts/head.php';
+require getConfig('templateLayoutDir') . 'doc-parts/head.php';
 
 ?>
 <body>
@@ -10,15 +10,15 @@ require LAYOUT_DIR . 'doc-parts/head.php';
         </div>
 
         <header class="t-teal200 bg-teal850 t140 t-center pad5-tb">
-			<?php require LAYOUT_DIR . 'doc-parts/header.php'; ?>
+			<?php require getConfig('templateLayoutDir') . 'doc-parts/header.php'; ?>
         </header>
 
         <nav class="pad20-rl">
-            <?php require LAYOUT_DIR . 'doc-parts/nav.php'; ?>
-            <?php require LAYOUT_DIR . 'doc-parts/menu.php'; ?>
+            <?php require getConfig('templateLayoutDir') . 'doc-parts/nav.php'; ?>
+            <?php require getConfig('templateLayoutDir') . 'doc-parts/menu.php'; ?>
         </nav>
 
-        <?php require LAYOUT_DIR . 'doc-parts/footer.php'; ?>
+        <?php require getConfig('templateLayoutDir') . 'doc-parts/footer.php'; ?>
     </section>
 
     <section id="myContent" class="w100-phone mar0-tablet" style="margin-left: 250px; max-width: 1100px;">
@@ -38,6 +38,5 @@ require LAYOUT_DIR . 'doc-parts/head.php';
     </section>
     
 	<?= implode(getKeysPageData('lazy', '[val]')) ?>
-    <script src="<?= getConfig('assetsUrl') ?>js/my.js"></script>
 </body>
 </html>

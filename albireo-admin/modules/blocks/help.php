@@ -7,8 +7,9 @@ slug: admin/blocks/help
 slug-static: -
 parser: simple
 compress: 1
+protect-pre: 1
 layout: admin/core/_layout.php
-head[]: <script src="[data-url]admin/assets/alpine.min.js"></script>
+head[]: <script src="[admin-url]assets/alpine.min.js"></script>
 
 admin-menu[title]: ---
 admin-menu[group]: Modules
@@ -23,6 +24,7 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
 
 <div class="mar30-t pad30-rl pad10-rl-tablet pad20-b">
 
+<pre>
 Блоки хранятся в базе.
 
 blocks_id — автоинкремент
@@ -42,13 +44,13 @@ blocks_end - содержимое после основного
 — подумать
 blocks_vars - какие-то опции для текущего блока — делаются замены 
 
-	blocks_content:
-		<div>[header]</div>
-		<div>@description</div>
-	
-	blocks_vars
-		[header] = Заголовок
-		@description = Описание
+blocks_content:
+<div>[header]</div>
+<div>@description</div>
+
+blocks_vars
+[header] = Заголовок
+@description = Описание
 
 ---------
 
@@ -56,6 +58,7 @@ blocks_vars - какие-то опции для текущего блока — 
 echo Blocks\Blocks\out('название блока');
 echo Blocks\Blocks\outID(7); // номер блока
 
+</pre>
 
 
 </div>

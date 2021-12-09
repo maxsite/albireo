@@ -90,11 +90,12 @@ if ($afterCopy = getConfig('afterCopy', [])) {
     echo "\n";
     
     // перебираем их 
-    foreach ($afterCopy as $dir) {
+    foreach ($afterCopy as $src => $dest) {
         // если исходный каталог действительно существует
-        if (file_exists(BASE_DIR . $dir)) {
-            echo 'Copy dir: ' . $dir . "\n"; // вывод в консоли
-            copyDir(BASE_DIR . $dir, $staticDir . $dir); // копируем каталог
+        if (file_exists(BASE_DIR . $src)) {
+            echo 'Copy dir: ' . $src . "\n"; // вывод в консоли
+
+            copyDir(BASE_DIR . $src, $staticDir . $dest); // копируем каталог
         }
     }
     

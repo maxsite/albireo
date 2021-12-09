@@ -38,7 +38,7 @@ foreach($pagesInfo as $file => $info) {
 	if (isset($info['sitemap']) and $info['sitemap'] == '-') continue;
 	
 	// исключить pages/admin
-	if (strpos($file, DATA_DIR . 'admin' . DIRECTORY_SEPARATOR) !== FALSE) continue;
+	if (strpos($file, ADMIN_DIR) !== FALSE) continue;
 	
 	$changefreq = $info['sitemap-changefreq'] ?? $changefreqDef;
 	$priority = $info['sitemap-priority'] ?? $priorityDef;

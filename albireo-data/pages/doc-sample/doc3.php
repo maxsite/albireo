@@ -42,13 +42,13 @@ menu[order]: 1
     _ Этот вариант может использоваться для случаев, если пункты меню нужно указывать вручную. Для его включения, следует в файле @layout/doc.php@ строчку
 
 pre
-&lt;?php require LAYOUT_DIR . 'doc-parts/menu.php'; ?&gt;
+&lt;?php require getConfig('templateLayoutDir') . 'doc-parts/menu.php'; ?&gt;
 /pre
 
     _ заменить на
     
 pre
-&lt;?php require LAYOUT_DIR . 'doc-parts/menu-manual.php'; ?&gt;
+&lt;?php require getConfig('templateLayoutDir') . 'doc-parts/menu-manual.php'; ?&gt;
 /pre
     
     _ После этого параметры страниц @menu@ будут игнорироваться, а пункты можно задать в файле @config/menu-data.php@.

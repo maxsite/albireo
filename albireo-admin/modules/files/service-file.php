@@ -24,10 +24,10 @@ verifyLoginRedirect(['admin'], 'You do not have permission to access the admin p
     <?php
 
     service_files(CONFIG_DIR, '<h4>Config</h4>');
-    service_files(LAYOUT_DIR, '<h4 class="mar30-t">Layout</h4>');
     service_files(SNIPPETS_DIR, '<h4 class="mar30-t">Snippets</h4>');
     service_files(ADMIN_DIR . 'config' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Admin</h4>', 0, false);
     service_files(DATA_DIR . 'backup' . DIRECTORY_SEPARATOR, '<h4 class="mar30-t">Backup</h4>');
+    service_files(getConfig('templateLayoutDir'), '<h4 class="mar30-t">Layout (current template)</h4>');
 
     $configAdmin = getConfigAdmin();
     $serviceDirs = $configAdmin['serviceDirs'] ?? [];

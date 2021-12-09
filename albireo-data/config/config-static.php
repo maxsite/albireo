@@ -1,4 +1,4 @@
-<?php if (!defined('BASE_DIR')) exit('No direct script access allowed'); 
+<?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 /**
  * (c) Albireo Framework, https://maxsite.org/albireo, 2020
  */
@@ -7,14 +7,23 @@
 
 return [
 	// каталог хранения готовых статичных страниц
-	'staticDir' => BASE_DIR . 'albireo-static' . DIRECTORY_SEPARATOR,	
-	'assetsUrl' => 'assets/',
+	'staticDir' => BASE_DIR . 'albireo-static' . DIRECTORY_SEPARATOR,
+
+	// шаблон сайта    
+	'template' => 'default', // имя (каталог) шаблона внутри albireo-templates
+
+	// настройки шаблона
+	'layoutDir' => 'layout', // каталог layout внутри текущего шаблона
+	'assets' => 'assets', // url-путь к assets относительно текущего шаблона
+
+	// файл вывода по умолчанию в layout
 	'layout' => 'main.php',
-	'afterCopy' => ['assets'], // после генерации скопировать каталоги
-	
-	// каталоги, где ещё могут располагаться страницы, кроме DATA_DIR и /pages
-	// указывается полный путь
-	// 'dirsForPages' => [BASE_DIR . 'my-pages'],
+
+	// после генерации скопировать каталоги (исходный относительно корня => куда относительно конечного)
+	'afterCopy' => [
+		'albireo-templates/default/assets' => 'assets',
+	],
+
 ];
 
 # end of file
