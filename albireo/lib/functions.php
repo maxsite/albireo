@@ -518,8 +518,11 @@ function matchUrlPage()
     }
 
     // если ничего не найдено, отдаём файл 404-страницы
-    if (!$result and file_exists(DATA_DIR . '404.php')) $result =  DATA_DIR . '404.php';
-
+    if (!$result and file_exists(DATA_DIR . '404.php')) {
+        $result =  DATA_DIR . '404.php';
+        setVal('is404', true); // сохранем отметку, что это 404-страница
+    }
+    
     // сохраним в хранилище имя файла
     setVal('pageFile', $result);
 
