@@ -19,8 +19,8 @@
  *
  * # insert (with PDO prepare)
  * Pdo\PdoQuery::insert($db,  'mytable', ['field1' => $value, 'field2' => $value]);
- * or 
- * Pdo\PdoQuery::insert($db,  'mytable', 
+ * or
+ * Pdo\PdoQuery::insert($db,  'mytable',
  *	['field1' => $value, 'field2' => $value],
  *	['field1' => $value, 'field2' => $value],
  *	['field1' => $value, 'field2' => $value],
@@ -250,9 +250,14 @@ class PdoQuery
         return isset($allRows[0]['count']) ? $allRows[0]['count'] : $def;
     }
 
-    public static function getPagination(\PDO $db, string $table, int $limit, int $current)
+    public static function getPagination(\PDO $db, string $table, int $limit, int $current, int $countRecord = 0)
     {
-        $records = self::countRecord($db, $table); // всего записей в базе
+        if ($countRecord > 0) {
+            $records = $countRecord;
+        } else {
+            $records = self::countRecord($db, $table); // узнаем сколько записей в базе
+        };
+
         $max = ceil($records / $limit); // всего станиц пагинации
 
         if ($current > $max) $current = $max;
@@ -270,7 +275,7 @@ class PdoQuery
     {
 		// если это не массив, то выходим (может быть ошибка)
 		if (!is_array($rows)) return '';
-		
+
         $out = ''; // итоговый вывод
 
         // формируем таблицу
