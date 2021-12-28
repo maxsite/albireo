@@ -718,7 +718,7 @@ function readPages()
     setVal('pagesInfo', $pagesInfo);
 
     // сохраняем данные в кэше — файл pagesinfo.txt
-    $cache = Services\Services::getInstance()->get('Cache\Cache');
+    $cache = Services\Services::getInstance()->get(Cache\Cache::class);
 
     // когда доступнен класс кэширования, сохраним
     if ($cache !== null) $cache->set('pagesinfo', $pagesInfo);
@@ -784,7 +784,7 @@ function getCachePagesInfo(string $key)
 
     // формируем объект кэша - он настраивается в конфигурации
     // используем контейнер, поскольку класс Cache\Cache нам нужен в единственном экземпляре
-    $cache = Services\Services::getInstance()->get('Cache\Cache');
+    $cache = Services\Services::getInstance()->get(Cache\Cache::class);
 
     // не доступнен класс кэширования
     if ($cache === null) return false;
