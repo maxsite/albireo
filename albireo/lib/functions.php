@@ -522,7 +522,7 @@ function matchUrlPage()
         $result =  DATA_DIR . '404.php';
         setVal('is404', true); // сохранем отметку, что это 404-страница
     }
-    
+
     // сохраним в хранилище имя файла
     setVal('pageFile', $result);
 
@@ -917,25 +917,52 @@ function storage(bool $set, string $key, $value, $default)
 /**
  * Преобразуем текст тэгов PRE и CODE в html-сущности
  * @param $text - входящий текст
- * @param $mode - режим замены 1 - <PRE> и <CODE>, 2 - только <PRE>, 3 - только <CODE>
+ * @param $mode - режим замены 1 - <PRE> и <CODE>, 2 - только <CODE>
  */
 function protectHTMLCode(string $text, $mode = '1')
 {
-    if ($mode == '1' or $mode == '2') {
+    if ($mode == '1') {
+        $text = preg_replace_callback('!(<pre><code.*?>)(.*?)(</code></pre>)!is', '_protect_pre', $text);
+        $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', '_protect_pre', $text);
+        $text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', '_protect_pre', $text);
+
+        $text = preg_replace_callback('!@html_base64@(.*?)@/html_base64@!is', function ($m) {
+            return base64_decode($m[1]);
+        }, $text);
+
+        /*
+        // старый вариант — только <pre> 
         $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
             $t = htmlspecialchars($m[2]); // в html-сущности
             $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
             return $m[1] . $t . $m[3];
         }, $text);
+        */
     }
 
-    if ($mode == '1' or $mode == '3') {
+    if ($mode == '2') {
         $text = preg_replace_callback('!(<code.*?>)(.*?)(</code>)!is', function ($m) {
             $t = htmlspecialchars($m[2]);
             $t = str_replace('&amp;', '&', $t);
             return $m[1] . $t . $m[3];
         }, $text);
     }
+
+    return $text;
+}
+
+/**
+ * Callback-функция к protectHTMLCode, где происходит замена html-символов
+ * @param $matches - входящая регулярка
+ */
+function _protect_pre($matches)
+{
+    $text = $matches[2]; // получили нужную часть текста
+    $text = htmlspecialchars($matches[2]); // преобразовали в html-сущности
+    $text = str_replace('&amp;', '&', $text); // амперсанд вернуть назад, чтобы иметь возможность его использовать в тексте
+    
+    // закинули в base64
+    $text =  '@html_base64@' . base64_encode($matches[1] . $text . $matches[3]) . '@/html_base64@';
 
     return $text;
 }
@@ -1082,7 +1109,7 @@ spl_autoload_register(function ($class) {
 
     // формируем имя файла
     $fn0 = $path . DIRECTORY_SEPARATOR . $file;
-        
+
     // если путь класс начинается с «admin\», то меняем его на каталог админки
     if (strpos($fn0, 'admin' . DIRECTORY_SEPARATOR) === 0)
         $fn0 = str_replace('admin' . DIRECTORY_SEPARATOR, ADMIN_N . DIRECTORY_SEPARATOR, $fn0);
