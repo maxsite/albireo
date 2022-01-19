@@ -26,7 +26,7 @@ foreach ($menuEl as $key => $e) {
 	// показываем только активную секцию
 	$active_section = array_key_exists($file, $e) ? ' open' : '';
 
-	echo '<details' . $active_section . '><summary class="' . $options['header'] . '" style="--summary-marker: \'➕\'; --summary-marker-rotate: 135deg; --summary-marker-time: .6s;">' . $key . '</summary>';
+	echo '<details' . $active_section . '><summary class="' . $options['header'] . '" style="--summary-marker: \'✚\'; --summary-marker-rotate: 135deg; --summary-marker-time: .6s;">' . $key . '</summary>';
 	echo '<ul class="' . $options['list'] . '">';
 
 	foreach ($e as $slug => $name) {
