@@ -52,6 +52,7 @@ return [
             ['CODE', '<code>', '</code>'],
             ['KBD', '<kbd>', '</kbd>'],
             ['MARK', '<mark>', '</mark>'],
+            ['VAR', '<var>', '</var>'],
         ],
         
         'Heading' => [
@@ -81,6 +82,8 @@ return [
             ['b', '*', '*'],
             ['i', '_', '_'],
             ['code', '@', '@'],
+            ['mark', '@@', '@@'],
+            ['underline', '~~', '~~'],
             ['-'],
             ['h1', 'h1 ', ''],
             ['h2', 'h2 ', ''],
@@ -94,15 +97,19 @@ return [
             ['-'],
             ['hr', 'hr', ''],
             ['-'],
-            ['[psimple]', '[psimple]\\n', '\\n[/psimple]'],
             ['p', '_ ', ''],
             ['div (line)', '__ ', ''],
             ['div', 'div()\\n', '\\n/div'],
             ['pre', 'pre\\n', '\\n/pre'],
+            ['pcode', 'pcode\\n', '\\n/pcode'],
             ['bqq (line)', 'bqq ', '', 'blockquote'],
             ['bq', 'bq\\n', '\\n/bq', 'blockquote'],
             ['-'],
-            ['nosimple', '<!-- nosimple -->', '<!-- /nosimple -->', 'NoSimple'],
+            ['nosimple', '<!-- nosimple -->', '<!-- /nosimple -->', 'NoSimple in block'],
+            ['keep', '<keep>\\n', '\\n</keep>'],
+            ['-'],
+            ['[psimple]', '[psimple]\\n', '\\n[/psimple]'],
+            ['paragraphs', '<!-- paragraphs -->', '<!-- /paragraphs -->', 'Auto paragraphs'],
         ],
         
         '<i class="im-info-circle"></i>Help' => [
