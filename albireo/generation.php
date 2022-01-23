@@ -4,7 +4,7 @@
  */
 
 echo "\nALBIREO FRAMEWORK\n=================\n";
- 
+
 require_once SYS_DIR . 'lib/functions.php';
 
 // выходной каталог
@@ -16,7 +16,7 @@ if (file_exists($staticDir)) deleteDir($staticDir);
 // теперь, если каталога нет, пробуем создать
 if (!is_dir($staticDir)) @mkdir($staticDir);
 
-// если не получилось выходим с ошибкой
+// если не получилось - выходим с ошибкой
 if (!is_dir($staticDir)) exit('Error: staticDir not found');
 
 // считать данные всех pages
@@ -49,7 +49,7 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
     // итоговый файл с учетом каталога
     $fileWrite = $staticDir . $fileOut;
 
-    // если в имени файла указан каталог то пробуем создать
+    // если в имени файла указан каталог, то пробуем создать
     if (strpos($fileOut, '/') !== false) {
         // замена для того, чтобы привести слэши к одному виду как принято в ОС
         $fileWrite = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $fileWrite);
@@ -64,7 +64,7 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
     setVal('pageData', $pageData);
     setVal('pageFile', $file);
 
-    // поскольку текущего URL не существует, то иммитируем на основе SITE_URL
+    // поскольку текущего URL не существует, то имитируем на основе SITE_URL
     setVal('currentUrl', [
         'method' => 'GET',
         'url' => $fileOut,
@@ -85,11 +85,11 @@ foreach (getVal('pagesInfo') as $file => $pageData) {
     echo str_replace($staticDir, '   ', $fileWrite) . "\n";
 }
 
-// возможно указана настройка в которой хранятся имена каталогов для копирования после генераци
+// возможно указана настройка, в которой хранятся имена каталогов для копирования после генераци
 if ($afterCopy = getConfig('afterCopy', [])) {
     echo "\n";
-    
-    // перебираем их 
+
+    // перебираем их
     foreach ($afterCopy as $src => $dest) {
         // если исходный каталог действительно существует
         if (file_exists(BASE_DIR . $src)) {
@@ -98,7 +98,7 @@ if ($afterCopy = getConfig('afterCopy', [])) {
             copyDir(BASE_DIR . $src, $staticDir . $dest); // копируем каталог
         }
     }
-    
+
     echo "\n";
 }
 

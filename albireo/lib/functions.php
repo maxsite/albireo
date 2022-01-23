@@ -48,7 +48,7 @@ function sessionFlashGet(string $key)
  *
  * <?= tpl(__DIR__ . '/my-block.php', ['header' => 'Hello!']) ?>
  *
- * В файле шаблона можно использовать обычный php-код, а таже замены:
+ * В файле шаблона можно использовать обычный php-код, а также замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
@@ -77,7 +77,7 @@ function tpl(string $FILE, array $DATA = [], bool $showError = true)
  * @param boolean $FILE - имя файла для вывода в ошибках
  * @return string
  *
- * В тексте можно использовать обычный php-код, а таже замены:
+ * В тексте можно использовать обычный php-код, а также замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
@@ -246,7 +246,7 @@ function _getContentFile($fn)
  */
 function pageOut()
 {
-    // проверим существание каталога шаблона
+    // проверим существование каталога шаблона
     if (!file_exists(getConfig('templateDir'))) {
         echo 'Error! Template not-found... ;-(';
         return;
@@ -355,7 +355,7 @@ function pageOut()
  */
 function processingContent(string $content, array $pageData)
 {
-    // если указан парсер парсеров может быть несколько через пробел
+    // если указан парсер, парсеров может быть несколько через пробел,
     // чтобы отключить парсер можно указать «-» (минус)
     if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
 
@@ -443,7 +443,7 @@ function getConfig(string $key, $default = '')
     if (!$config) {
         $config = [];
 
-        // конфигурация в режие генерации
+        // конфигурация в режиме генерации
         if (defined('GENERATE_STATIC')) {
             if (file_exists(CONFIG_DIR . 'config-static.php')) {
                 $config = require CONFIG_DIR . 'config-static.php';
@@ -455,7 +455,7 @@ function getConfig(string $key, $default = '')
             }
         }
 
-        // автоматически добавляем данные для текущего шаблона        
+        // автоматически добавляем данные для текущего шаблона
         $template = $config['template'] ?? 'default';
         $layoutDir = $config['layoutDir'] ?? 'layout';
 
@@ -520,7 +520,7 @@ function matchUrlPage()
     // если ничего не найдено, отдаём файл 404-страницы
     if (!$result and file_exists(DATA_DIR . '404.php')) {
         $result =  DATA_DIR . '404.php';
-        setVal('is404', true); // сохранем отметку, что это 404-страница
+        setVal('is404', true); // сохраняем отметку, что это 404-страница
     }
 
     // сохраним в хранилище имя файла
@@ -786,7 +786,7 @@ function getCachePagesInfo(string $key)
     // используем контейнер, поскольку класс Cache\Cache нам нужен в единственном экземпляре
     $cache = Services\Services::getInstance()->get(Cache\Cache::class);
 
-    // не доступнен класс кэширования
+    // недоступен класс кэширования
     if ($cache === null) return false;
 
     // файла кэша вообще нет, выходим
@@ -834,7 +834,7 @@ function getCachePagesInfo(string $key)
         // обновляем время построения текущего «снимка»
         $cache->set($lastFN, time());
 
-        // если они не равны, то кэш невалидный
+        // если они неравны, то кэш невалидный
         if ($snapshot != $snapshotOld) {
             // сохраняем в кэше новый
             $cache->set($snapshotFN, $snapshot);
@@ -844,7 +844,7 @@ function getCachePagesInfo(string $key)
         }
     }
 
-    // если всё, ок, то отдаём кэш из файла
+    // если всё ок, то отдаём кэш из файла
     return $cache->get($key, false);
 }
 
@@ -877,7 +877,7 @@ function getSnapshot(array $dirs)
 }
 
 /**
- * получение данных из хранилища
+ * Получение данных из хранилища
  * @param $key - ключ
  * @param $default - значение по умолчанию
  */
@@ -887,7 +887,7 @@ function getVal(string $key, $default = [])
 }
 
 /**
- * запись данных в хранилище
+ * Запись данных в хранилище
  * @param $key - ключ
  * @param $value - значение
  */
@@ -897,7 +897,7 @@ function setVal(string $key, $value)
 }
 
 /**
- * хранилище данных
+ * Хранилище данных
  * @param если $set = true, то это запись данных в хранилище
  * @param если $set = false, то получение данных из хранилища
  * @param $key - ключ
@@ -931,7 +931,7 @@ function protectHTMLCode(string $text, $mode = '1')
         }, $text);
 
         /*
-        // старый вариант — только <pre> 
+        // старый вариант — только <pre>
         $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
             $t = htmlspecialchars($m[2]); // в html-сущности
             $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
@@ -960,7 +960,7 @@ function _protect_pre($matches)
     $text = $matches[2]; // получили нужную часть текста
     $text = htmlspecialchars($matches[2]); // преобразовали в html-сущности
     $text = str_replace('&amp;', '&', $text); // амперсанд вернуть назад, чтобы иметь возможность его использовать в тексте
-    
+
     // закинули в base64
     $text =  '@html_base64@' . base64_encode($matches[1] . $text . $matches[3]) . '@/html_base64@';
 
