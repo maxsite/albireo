@@ -3,38 +3,38 @@
     (с) Albireo Framework
     (c) MAX — https://maxsite.org/albireo
     (c) MaxSite CMS — https://max-3000.com/
-    
+
     См. https://max-3000.com/book/simple
-    
+
     Версия: 2022-01-18
-    
+
     Возможности
     -----------
-    
+
     _ абзац P
-    
+
     __ блок DIV в одной строке
-    
+
     Тэги в одну строку:
     h1|h2|h3|h4|h5|h6|li|dt|dd|bqq
-    
+
     h1 заголовок H1
     h2 заголовок H2
     h3 заголовок H3
     h4 заголовок H4
     h5 заголовок H5
     h6 заголовок H6
-    
+
     bqq цитата blockquote в одной строке
-    
-    Тэги с обязательным закрывающим тэгом:	
+
+    Тэги с обязательным закрывающим тэгом:
     div|section|article|main|footer|hgroup|header|aside|nav|form|fieldset|label|select|
     pre|blockquote|ol|ul|bq|table|tr|td|th|caption|tbody|thead|tfoot|dl|pcode
-    
+
     div
         текст
     /div
-    
+
     Списки
     ul
         * привет
@@ -47,7 +47,7 @@
         * привет
         * привет
     /ol
-    
+
     ul
         li привет
         * привет
@@ -56,13 +56,13 @@
     /ul
 
     hr
-    
-    bq 
+
+    bq
         цитата blockquote
     /bq
-    
-    Строчные тэги внутри текста (впереди должен быть пробел): 
-    
+
+    Строчные тэги внутри текста (впереди должен быть пробел):
+
     __ italic __       <i>
     _ em _             <em>
     ** bold **         <b>
@@ -77,22 +77,22 @@
     ul(класс)
     div(класс)
     div(класс1 класс2)
-    
+
     После класса можно задать style
     _(класс)(стили)
     h1(класс)(стили)
     div(класс)(стили)
     section(класс)(стили)
-    
+
     Несколько блочных тэгов можно задавать в одной строке через ||
-        
+
     div(layout-center-wrap) || div(layout-wrap)
         текст
     /div || /div
-    
+
     Отключение Simple в блоке
     <!-- nosimple --> текст без обработки <!-- /nosimple -->
-    
+
     Если требуется автоматом расставить тэги <P> для каждой новой строки.
 
     Пример 1:
@@ -101,12 +101,12 @@
     Hello 2
     Hello 3
     [/psimple]
-    
+
     Результат:
     <p>Hello 1</p>
     <p>Hello 2</p>
     <p>Hello 3</p>
-    
+
     Пример 2:
     [psimple]
     Hello 1
@@ -116,7 +116,7 @@
     _ Hello 4
     Hello 5
     [/psimple]
-    
+
     Результат:
     <p>Hello 1</p>
     <p>Hello 2</p>
@@ -125,11 +125,11 @@
     <p>Hello 4</p>
     <p>Hello 5</p>
 
-    Если нужно автоматически расставить абзацы во всём тексте, то в него нужно добавить одиночный код 
+    Если нужно автоматически расставить абзацы во всём тексте, то в него нужно добавить одиночный код
         <!-- paragraphs -->
     в произвольном месте. Он будет работать точно также, как и блок [psimple] [/psimple]
 
-    Для того, чтобы исключить часть кода из любой обработки, можно 
+    Для того, чтобы исключить часть кода из любой обработки, можно
     использовать блок <keep>...</keep> вместо <!-- nosimple -->
 
     pre
@@ -143,7 +143,7 @@
     pcode(language-php)
         код
     pcode
-    
+
     Результат:
     <pre><code class="language-php"> код </code></pre>
 
@@ -214,7 +214,7 @@ function simple($text)
     # h1 Заголовок
     $text = preg_replace('!(^\s*)' . $tags1 . '\s+(.*?)\n!m', "$1<$2>$3</$2>\n", $text);
 
-    // открывающие и отдельно закрывающие тэги  div ...  /div
+    // Открывающие и отдельно закрывающие тэги  div ...  /div
     $tags2 = '(div|section|article|main|footer|hgroup|header|aside|nav|form|fieldset|label|select|pre|blockquote|bq|ol|ul|table|tr|td|th|caption|tbody|thead|tfoot|dl|pcode)';
 
     # /div
@@ -252,8 +252,8 @@ function simple($text)
     $text = preg_replace('!<pre><code (.*?)>\n!m', "<pre><code $1>", $text);
     $text = str_replace("<pre><code>\n", '<pre><code>', $text);
     $text = str_replace("\n</code></pre>", '</code></pre>', $text);
-    
-    #  [psimple] ... [/psimple] — авторасстановка <p> для всех \n внутри блока 
+
+    #  [psimple] ... [/psimple] — авторасстановка <p> для всех \n внутри блока
     $text = preg_replace_callback('!(\[psimple\])(.*?)(\[/psimple\])!is', function ($m) {
         return preg_replace('~(^\s*)(?!\s*<)(.+)\n~m', "<p>$2</p>\n", $m[2]);
     }, $text);

@@ -2,7 +2,7 @@
 /**
 
 title: Pages
-description: 
+description:
 slug: admin/pages
 slug-static: -
 layout: admin/core/_layout.php
@@ -36,7 +36,7 @@ $oldDir = '.';
 
 foreach ($pagesInfo as $file => $info) {
     $file1 = str_replace(BASE_DIR, '', $file); // файл указывается относительно BASE_DIR
-    
+
     $newDir = dirname($file1);
 
     if ($newDir != $oldDir) {
@@ -45,11 +45,11 @@ foreach ($pagesInfo as $file => $info) {
     }
 
     // $title = (isset($info['title']) and $info['title']) ? htmlspecialchars($info['title']) : '<span class="t-red700">! No title</span>';
-    
+
     $title = (isset($info['title']) and $info['title']) ? htmlspecialchars($info['title']) : '<span class="t-red700">' . $info['slug'] . ' - no title</span>';
 
     $url = SITE_URL . $info['slug'];
-    $editUrl = SITE_URL . 'admin/edit/' . encodeURL64($file1); // файл кодиуется в base64
+    $editUrl = SITE_URL . 'admin/edit/' . encodeURL64($file1); // файл кодируется в base64
 
     // $file1 = str_replace('\\', '/', $file1);
 

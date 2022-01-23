@@ -9,28 +9,28 @@ return [
     // список каталогов для отображения на странице Files (service)
     // каталоги указываются относительно DATA_DIR
     'serviceDirs' => ['lib'],
-    
+
     // параметры для загрузки файлов
     'upload' => [
         // каталог для загрузки файлов — путь указывается относительно корня сайта BASE_DIR
-        'dir' => 'uploads', 
-        
+        'dir' => 'uploads',
+
         // максимальный размер файла в байтах
-        'maxSize' => '20000000', 
-        
+        'maxSize' => '20000000',
+
         // разрешенные расширения файлов
-        'ext' => 'mp3|mp4|gif|jpg|jpeg|png|svg|zip|txt|rar|doc|rtf|pdf|html|htm|css|xml|odt|avi|wmv|wav|xls|7z|gz|bz2|tgz',        
+        'ext' => 'mp3|mp4|gif|jpg|jpeg|png|svg|zip|txt|rar|doc|rtf|pdf|html|htm|css|xml|odt|avi|wmv|wav|xls|7z|gz|bz2|tgz',
     ],
 
     // временная поправка в формате strtotime()
     // https://www.php.net/manual/ru/function.strtotime.php
     'timezone' => '+2 hours',
-    
-    // режим работы кнопок текстового редактора — по клику или при наведении мыши
+
+    // режим работы кнопок текстового редактора — по клику или при наведении курсора
     'editorButtonMode' => 'hover', // click or hover
-    
+
     // кнопки к текстовому редактору
-    // Оформляются в виде групп, где название группы — пункт кнопки dropdown
+    // оформляются в виде групп, где название группы — пункт кнопки dropdown
     // каждая кнопка — этом массив из 3-х элементов: Название, вставка до, вставка после курсора
     // последний (4-й) необязательный элемент — подсказка title
     // если первый элемент равен «-» то это добавляет отступ между кнопками (<hr>)
@@ -54,7 +54,7 @@ return [
             ['MARK', '<mark>', '</mark>'],
             ['VAR', '<var>', '</var>'],
         ],
-        
+
         'Heading' => [
             ['H1', '<h1>', '</h1>'],
             ['H2', '<h2>', '</h2>'],
@@ -63,7 +63,7 @@ return [
             ['H5', '<h5>', '</h5>'],
             ['H6', '<h6>', '</h6>'],
         ],
-        
+
         'Other' => [
             ['P', '<p>', '</p>'],
             ['BLOCKQUOTE', '<blockquote>', '</blockquote>'],
@@ -111,7 +111,7 @@ return [
             ['[psimple]', '[psimple]\\n', '\\n[/psimple]'],
             ['paragraphs', '<!-- paragraphs -->', '<!-- /paragraphs -->', 'Auto paragraphs'],
         ],
-        
+
         '<i class="im-info-circle"></i>Help' => [
             ['<a class="im-link pad5-tb b-block hover-t-teal700 hover-no-underline t-nowrap" href="https://max-3000.com/book/simple" target="_blank">Simple</a>', '', ''],
             ['<a class="im-link pad5-tb b-block hover-t-teal700 hover-no-underline t-nowrap" href="https://maxsite.org/berry" target="_blank">Berry CSS</a>', '', ''],

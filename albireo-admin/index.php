@@ -2,7 +2,7 @@
 /**
 
 title: Albireo Admin
-description: 
+description:
 slug: admin
 slug-static: -
 layout: admin/core/_layout.php
@@ -23,14 +23,14 @@ $pagesInfo = array_filter($pagesInfo, function($val, $key){
     return (strpos($key, ADMIN_DIR) === FALSE);
 }, ARRAY_FILTER_USE_BOTH);
 
-// определеим последние изменённые файлы
+// определим последние изменённые файлы
 $lastFile = [];
 
 foreach ($pagesInfo as $file => $info) {
 	$t = $t1 = filemtime($file);
 
 	$t .= '-' . $file;
-	
+
 	$lastFile[$t] = $info;
 	$lastFile[$t]['__file_name'] = str_replace(BASE_DIR, '', $file);
 	$lastFile[$t]['__file_time'] = $t1;
@@ -46,7 +46,7 @@ if ($userNik) $userNik = ' ' . htmlspecialchars($userNik);
 ?>
 
 <div class="bg-yellow250 pad30-rl pad20-tb flex flex-vcenter flex-wrap-tablet">
-    div 
+    div
         h1(mar0) Welcome to Albireo!
         __(t-gray600 t90) Free open-source PHP framework
     /div
@@ -64,14 +64,14 @@ if ($userNik) $userNik = ' ' . htmlspecialchars($userNik);
             <a class="mar20-r im-comment-dots t-nowrap" href="https://github.com/maxsite/albireo/discussions" target="_blank">Discussions</a>
             <a class="mar20-r im-link t-nowrap" href="https://maxsite.org/" target="_blank">MaxSite.org</a>
         /div
-        
+
         __(t-right t-nowrap) <a class="mar20-r im-donate t-orange550 animation-bounce animation-infinite animation-slow b-inline" href="https://max-3000.com/page/donation" target="_blank" title="Donation"></a>
     /div
 
     h2 Information
 
     ul(no-bullet no-margin)
-    * Total Pages: <?= count($pagesInfo) ?> 
+    * Total Pages: <?= count($pagesInfo) ?>
 
     /ul
 

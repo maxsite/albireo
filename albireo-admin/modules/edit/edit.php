@@ -2,7 +2,7 @@
 /**
 
 title: Edit file
-description: 
+description:
 slug: admin/edit
 slug-pattern: admin/edit(.*?)
 slug-static: -
@@ -16,7 +16,7 @@ head[]: <script src="[admin-url]assets/alpine.min.js"></script>
 
 verifyLoginRedirect(['admin'], 'You do not have permission to access the admin panel!');
 
-// если нет второго сегмента, где закодировно имя файла, то выходим
+// если нет второго сегмента, где закодировано имя файла, то выходим
 
 $currentUrl = getVal('currentUrl');
 $segmentFile = basename($currentUrl['url']);

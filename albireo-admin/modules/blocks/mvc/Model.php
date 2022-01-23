@@ -22,7 +22,7 @@ class Model
         }
 
         // удаление таблицы — для тестирования создания новой
-        // \Pdo\PdoQuery::dropTable($this->db, 'blocks'); 
+        // \Pdo\PdoQuery::dropTable($this->db, 'blocks');
 
         // проверка существования таблицы
         if (!\Pdo\PdoQuery::tableExists($this->db, 'blocks')) {
@@ -63,7 +63,7 @@ class Model
         if ($currentPaged < 1) $currentPaged = 1;
         if ($limit < 5) $limit = 10;
 
-        // расчитать OFFSET и другие данные для пагинации
+        // рассчитать OFFSET и другие данные для пагинации
         $pagination = \Pdo\PdoQuery::getPagination($this->db, 'blocks', $limit, $currentPaged);
 
         $timezone = getConfigAdmin('timezone');
@@ -153,7 +153,7 @@ class Model
         $blocks_vars = $_POST['blocks_vars'] ?? '';
         $blocks_start = $_POST['blocks_start'] ?? '';
         $blocks_end = $_POST['blocks_end'] ?? '';
-        $blocks_mod = gmstrftime('%Y-%m-%d %H:%M:%S'); // время послденей модификации блока по Гринвичу
+        $blocks_mod = gmstrftime('%Y-%m-%d %H:%M:%S'); // время последней модификации блока по Гринвичу
 
         $message = 'Ok! Block #' . $blocks_id . ' updated';
 

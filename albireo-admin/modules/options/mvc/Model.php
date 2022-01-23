@@ -22,7 +22,7 @@ class Model
         }
 
         // удаление таблицы — для тестирования создания новой
-        // \Pdo\PdoQuery::dropTable($this->db, 'log'); 
+        // \Pdo\PdoQuery::dropTable($this->db, 'log');
 
         // проверка существования таблицы log
         if (!\Pdo\PdoQuery::tableExists($this->db, 'options')) {
@@ -50,7 +50,7 @@ class Model
         if ($currentPaged < 1) $currentPaged = 1;
         if ($limit < 5) $limit = 10;
 
-        // расчитать OFFSET и другие данные для пагинации
+        // рассчитать OFFSET и другие данные для пагинации
         $pagination = \Pdo\PdoQuery::getPagination($this->db, 'options', $limit, $currentPaged);
 
         // получаем данные с учетом пагинации

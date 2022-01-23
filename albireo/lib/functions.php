@@ -48,7 +48,7 @@ function sessionFlashGet(string $key)
  *
  * <?= tpl(__DIR__ . '/my-block.php', ['header' => 'Hello!']) ?>
  *
- * В файле шаблона можно использовать обычный php-код, а таже замены:
+ * В файле шаблона можно использовать обычный php-код, а также замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
@@ -71,19 +71,18 @@ function tpl(string $FILE, array $DATA = [], bool $showError = true)
 
 /**
  * Шаблонизатор для произвольного текста
- * @param string $_Content - текст
- * @param array $DATA - данные, которые будут доступны в файле в виде переменных
- * @param boolean $_showError - отображать ли ошибки в файле шаблона
- * @param boolean $FILE - имя файла для вывода в ошибках
- * @return string
- *
- * В тексте можно использовать обычный php-код, а таже замены:
+ * В тексте можно использовать обычный php-код, а также замены:
  * {{ $header }} -> эквивалентно <?= $header ?>
  * {* $header *} -> эквивалентно <?= htmlspecialchars($header, ENT_QUOTES) ?>
  * {% код %} -> эквивалентно <?php код ?>
  * Также будет доступна переменная $DATA (исходный массив данных)
+ * @param string $_Content - текст
+ * @param array $DATA - данные, которые будут доступны в файле в виде переменных
+ * @param boolean $_showError - отображать ли ошибки в файле шаблона
+ * @param string $FILE - имя файла для вывода в ошибках
+ * @return string
  */
-function tplContent(string $_Content, array $DATA = [], bool $_showError = true, string $FILE = '')
+function tplContent(string $_Content, array $DATA = [], bool $_showError = true, string $FILE = ''): string
 {
     // замены шаблонизатора
     $_Content = str_replace(['{*', '*}', '{{', '}}', '{%', '%}'], ['<?= htmlspecialchars(', ', ENT_QUOTES) ?>', '<?= ', ' ?>', '<?php ', ' ?>'], $_Content);
@@ -133,10 +132,10 @@ function copyDir(string $src, string $dst)
 
 /**
  * Получить данные из файла конфигурации
- * @param $file - файл
- * @param $key - если указан ключ, то возвращаем его массив
+ * @param string $file - файл
+ * @param string $key - если указан ключ, то возвращаем его массив
  */
-function getConfigFile(string $file, $key = '')
+function getConfigFile(string $file, string $key = ''): array
 {
     if (file_exists($file)) {
         $config = require $file;
@@ -157,10 +156,10 @@ function getConfigFile(string $file, $key = '')
  *
  * @param string $key — искомый ключ
  * @param string $format — html-формат вывода [key] и [val]. Если = false, то отдаётся массив данных
- * @param $pageData — данные страницы. Если false, то получаем автоматом из текущей
+ * @param array|bool $pageData - данные страницы. Если false, то получаем автоматом из текущей
  * @return array
  */
-function getKeysPageData(string $key = 'meta', string $format = '<meta property="[key]" content="[val]">', $pageData = false)
+function getKeysPageData(string $key = 'meta', string $format = '<meta property="[key]" content="[val]">', $pageData = false): array
 {
     $out = []; // выходной массив
 
@@ -170,7 +169,7 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
     // проходимся по данным страницы
     foreach ($pageData as $k => $v) {
         // ищем шаблон поиска в ключе массива
-        if (preg_match('!^' . $key . '\[(.*?)\]$!is', $k, $m)) {
+        if (preg_match('!^' . $key . '\[(.*?)]$!is', $k, $m)) {
             // есть совпадение
 
             // если указан выходной html-формат, то используем его
@@ -201,9 +200,10 @@ function getKeysPageData(string $key = 'meta', string $format = '<meta property=
  * Удаление каталога и всех его файлов
  * https://www.php.net/manual/ru/function.rmdir.php#110489
  *
- * @param $dir - удаляемый каталог
+ * @param string $dir - удаляемый каталог
+ * @return bool
  */
-function deleteDir(string $dir)
+function deleteDir(string $dir): bool
 {
     $files = array_diff(scandir($dir), ['.', '..']);
 
@@ -216,10 +216,10 @@ function deleteDir(string $dir)
 
 /**
  * Вывести сниппет
- * @param $snippet - имя сниппета
- * @param $data - произвольные данные, которые будут доступны в файле сниппета
  * snippet('twitter'); // выведет файл albireo-data/snippets/twitter.php
  * snippet('nextprev', ['page4', 'page6']);
+ * @param string $snippet - имя сниппета
+ * @param string|array $data - произвольные данные, которые будут доступны в файле сниппета
  */
 function snippet(string $snippet, $data = '')
 {
@@ -229,12 +229,15 @@ function snippet(string $snippet, $data = '')
 /**
  * Вспомогательная функция подключает файл и получает его результат
  * используется для изоляции файла от остальных функций
+ * @param string $fn
+ * @return string
  */
-function _getContentFile($fn)
+function _getContentFile(string $fn): string
 {
     ob_start(); // включаем буферизацию
     require $fn; // подключаем файл
     $content = ob_get_contents(); // забрали результат
+    if (!$content) $content = '';
 
     if (ob_get_length()) ob_end_clean(); // очистили буфер
 
@@ -246,7 +249,7 @@ function _getContentFile($fn)
  */
 function pageOut()
 {
-    // проверим существание каталога шаблона
+    // проверим существование каталога шаблона
     if (!file_exists(getConfig('templateDir'))) {
         echo 'Error! Template not-found... ;-(';
         return;
@@ -353,9 +356,9 @@ function pageOut()
  * @param array $pageData - данные страницы
  * @return string
  */
-function processingContent(string $content, array $pageData)
+function processingContent(string $content, array $pageData): string
 {
-    // если указан парсер парсеров может быть несколько через пробел
+    // если указан парсер, парсеров может быть несколько через пробел,
     // чтобы отключить парсер можно указать «-» (минус)
     if (isset($pageData['parser']) and $pageData['parser'] and $pageData['parser'] != '-') {
 
@@ -403,11 +406,11 @@ function processingContent(string $content, array $pageData)
 /**
  * Получить параметры страницы
  * @param $key - ключ
- * @param $default - значение по умолчанию, если нет в данных страницы
- * @param $before - приставка к результату, если он есть
- * @param $after - корень к результату, если он есть
+ * @param string $default - значение по умолчанию, если нет в данных страницы
+ * @param string $before - приставка к результату, если он есть
+ * @param string $after - корень к результату, если он есть
  */
-function getPageData(string $key,  $default = '', $before = '', $after = '')
+function getPageData(string $key, string $default = '', string $before = '', string $after = '')
 {
     $pageData = getVal('pageData');
 
@@ -421,19 +424,20 @@ function getPageData(string $key,  $default = '', $before = '', $after = '')
 /**
  * Получить параметры страницы с обработкой HTML - аналогично getPageData()
  * @param $key - ключ
- * @param $default - значение по умолчанию, если нет в данных страницы
- * @param $before - приставка к результату, если он есть
- * @param $after - корень к результату, если он есть
+ * @param string $default - значение по умолчанию, если нет в данных страницы
+ * @param string $before - приставка к результату, если он есть
+ * @param string $after - корень к результату, если он есть
  */
-function getPageDataHtml(string $key,  $default = '', $before = '', $after = '')
+function getPageDataHtml(string $key, string $default = '', string $before = '', string $after = ''): string
 {
-    return htmlspecialchars(getPageData($key,  $default, $before, $after));
+    return htmlspecialchars(getPageData($key, $default, $before, $after));
 }
 
 /**
  * Получить значение из файла конфигурации
- * @param $key - ключ
- * @param $default - значение по умолчанию
+ * @param string $key - ключ
+ * @param mixed|null $default - значение по умолчанию
+ * @return mixed
  */
 function getConfig(string $key, $default = '')
 {
@@ -443,7 +447,7 @@ function getConfig(string $key, $default = '')
     if (!$config) {
         $config = [];
 
-        // конфигурация в режие генерации
+        // конфигурация в режиме генерации
         if (defined('GENERATE_STATIC')) {
             if (file_exists(CONFIG_DIR . 'config-static.php')) {
                 $config = require CONFIG_DIR . 'config-static.php';
@@ -455,7 +459,7 @@ function getConfig(string $key, $default = '')
             }
         }
 
-        // автоматически добавляем данные для текущего шаблона        
+        // автоматически добавляем данные для текущего шаблона
         $template = $config['template'] ?? 'default';
         $layoutDir = $config['layoutDir'] ?? 'layout';
 
@@ -479,7 +483,7 @@ function getConfig(string $key, $default = '')
  * $pageFile = getVal('pageFile'); // файл записи
  * $pageData = getVal('pageData'); // данные записи
  */
-function matchUrlPage()
+function matchUrlPage(): string
 {
     $currentUrl = getVal('currentUrl'); // текущий адрес
     $pagesInfo = getVal('pagesInfo'); // все страницы
@@ -519,8 +523,8 @@ function matchUrlPage()
 
     // если ничего не найдено, отдаём файл 404-страницы
     if (!$result and file_exists(DATA_DIR . '404.php')) {
-        $result =  DATA_DIR . '404.php';
-        setVal('is404', true); // сохранем отметку, что это 404-страница
+        $result = DATA_DIR . '404.php';
+        setVal('is404', true); // сохраняем отметку, что это 404-страница
     }
 
     // сохраним в хранилище имя файла
@@ -626,7 +630,7 @@ function readPages()
 
     // убираем те, которые начинаются с «_» и «.»
     $allFiles = array_filter($allFiles, function ($x) {
-        if (strpos(basename($x), '_') === 0 or strpos(basename($x), '.') === 0)
+        if (in_array(basename($x)[0], ['_', '.']))
             return false;
         else
             return true;
@@ -646,7 +650,7 @@ function readPages()
 
         // найдем служебную часть
         // она внутри: /** тут  **/
-        if (preg_match('!\/\*\*(.*?)\*\*\/!is', $content, $math)) {
+        if (preg_match('!/\*\*(.*?)\*\*/!is', $content, $math)) {
             $content = '?>' . trim($math[1]); // подготовка для eval
             ob_start(); // включили буферизация
             eval($content); // можно использовать PHP-код
@@ -702,7 +706,7 @@ function readPages()
                 $parts = pathinfo($f);
 
                 // берём только путь и имя файла без расширения
-                $slug =  $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
+                $slug = $parts['dirname'] . DIRECTORY_SEPARATOR . $parts['filename'];
 
                 // делаем замены слэшей на URL
                 $slug = str_replace(['.\\', './', '\\'], ['', '', '/'], $slug);
@@ -766,6 +770,7 @@ class PageSortedIterator extends SplHeap
             $this->insert($item);
         }
     }
+
     public function compare($b, $a): int
     {
         return strcmp($a->getRealpath(), $b->getRealpath());
@@ -776,6 +781,7 @@ class PageSortedIterator extends SplHeap
  * Получить данные страниц из кэша
  * Кэш устаревает когда были изменения в каталоге DATA_DIR (albireo-data/*) и ADMIN_DIR
  * @param $key - имя файла в кэше без расширения
+ * @return false|mixed
  */
 function getCachePagesInfo(string $key)
 {
@@ -784,9 +790,10 @@ function getCachePagesInfo(string $key)
 
     // формируем объект кэша - он настраивается в конфигурации
     // используем контейнер, поскольку класс Cache\Cache нам нужен в единственном экземпляре
+    /** @var  Cache\CacheInterface $cache */
     $cache = Services\Services::getInstance()->get(Cache\Cache::class);
 
-    // не доступнен класс кэширования
+    // недоступен класс кэширования
     if ($cache === null) return false;
 
     // файла кэша вообще нет, выходим
@@ -803,7 +810,7 @@ function getCachePagesInfo(string $key)
     // это позволяет уменьшить количество обращений к диску при большом количестве http-запросов
 
     // время по умолчанию 10 секунд
-    $cacheTimeL1 = (int) getConfig('cacheTimeL1', 10);
+    $cacheTimeL1 = (int)getConfig('cacheTimeL1', 10);
 
     // имя файла last формируем динамически с привязкой к файлу кэша
     $lastFN = 'last' . crc32($key);
@@ -834,7 +841,7 @@ function getCachePagesInfo(string $key)
         // обновляем время построения текущего «снимка»
         $cache->set($lastFN, time());
 
-        // если они не равны, то кэш невалидный
+        // если они неравны, то кэш невалидный
         if ($snapshot != $snapshotOld) {
             // сохраняем в кэше новый
             $cache->set($snapshotFN, $snapshot);
@@ -844,7 +851,7 @@ function getCachePagesInfo(string $key)
         }
     }
 
-    // если всё, ок, то отдаём кэш из файла
+    // если всё ок, то отдаём кэш из файла
     return $cache->get($key, false);
 }
 
@@ -853,7 +860,7 @@ function getCachePagesInfo(string $key)
  * @param array $dirs - каталоги
  * @return string
  */
-function getSnapshot(array $dirs)
+function getSnapshot(array $dirs): string
 {
     $snapshot = '';
 
@@ -877,9 +884,9 @@ function getSnapshot(array $dirs)
 }
 
 /**
- * получение данных из хранилища
- * @param $key - ключ
- * @param $default - значение по умолчанию
+ * Получение данных из хранилища
+ * @param string $key - ключ
+ * @param array|string $default - значение по умолчанию
  */
 function getVal(string $key, $default = [])
 {
@@ -887,8 +894,8 @@ function getVal(string $key, $default = [])
 }
 
 /**
- * запись данных в хранилище
- * @param $key - ключ
+ * Запись данных в хранилище
+ * @param string $key - ключ
  * @param $value - значение
  */
 function setVal(string $key, $value)
@@ -897,10 +904,9 @@ function setVal(string $key, $value)
 }
 
 /**
- * хранилище данных
- * @param если $set = true, то это запись данных в хранилище
- * @param если $set = false, то получение данных из хранилища
- * @param $key - ключ
+ * Хранилище данных
+ * @param bool $set если $set = true, то это запись данных в хранилище, если $set = false, то получение данных из хранилища
+ * @param string $key - ключ
  * @param $value - значение для записи
  * @param $default - дефолтное значение, если ключ не определён
  */
@@ -916,10 +922,10 @@ function storage(bool $set, string $key, $value, $default)
 
 /**
  * Преобразуем текст тэгов PRE и CODE в html-сущности
- * @param $text - входящий текст
- * @param $mode - режим замены 1 - <PRE> и <CODE>, 2 - только <CODE>
+ * @param string $text - входящий текст
+ * @param string $mode - режим замены 1 - <PRE> и <CODE>, 2 - только <CODE>
  */
-function protectHTMLCode(string $text, $mode = '1')
+function protectHTMLCode(string $text, string $mode = '1'): string
 {
     if ($mode == '1') {
         $text = preg_replace_callback('!(<pre><code.*?>)(.*?)(</code></pre>)!is', '_protect_pre', $text);
@@ -931,7 +937,7 @@ function protectHTMLCode(string $text, $mode = '1')
         }, $text);
 
         /*
-        // старый вариант — только <pre> 
+        // старый вариант — только <pre>
         $text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', function ($m) {
             $t = htmlspecialchars($m[2]); // в html-сущности
             $t = str_replace('&amp;', '&', $t); // амперсанд нужно вернуть назад, чтобы иметь возможность его использовать в тексте
@@ -953,18 +959,16 @@ function protectHTMLCode(string $text, $mode = '1')
 
 /**
  * Callback-функция к protectHTMLCode, где происходит замена html-символов
- * @param $matches - входящая регулярка
+ * @param string $matches - входящая регулярка
  */
-function _protect_pre($matches)
+function _protect_pre(string $matches): string
 {
     $text = $matches[2]; // получили нужную часть текста
     $text = htmlspecialchars($matches[2]); // преобразовали в html-сущности
     $text = str_replace('&amp;', '&', $text); // амперсанд вернуть назад, чтобы иметь возможность его использовать в тексте
-    
-    // закинули в base64
-    $text =  '@html_base64@' . base64_encode($matches[1] . $text . $matches[3]) . '@/html_base64@';
 
-    return $text;
+    // закинули в base64
+    return '@html_base64@' . base64_encode($matches[1] . $text . $matches[3]) . '@/html_base64@';
 }
 
 /**
@@ -995,10 +999,10 @@ function createHtaccess()
 /**
  * Функция для отладки из MaxSite CMS
  * @param $var - переменная для вывода
- * @param $html - обработать как HTML
- * @param $echo - вывод в браузер
+ * @param bool $html - обработать как HTML
+ * @param bool $echo - вывод в браузер
  */
-function pr($var, $html = true, $echo = true)
+function pr($var, bool $html = true, bool $echo = true)
 {
     if (!$echo)
         ob_start();

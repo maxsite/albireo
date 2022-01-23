@@ -17,7 +17,7 @@ if (!defined('SITE_PROTOCOL')) {
     unset($protocol);
 }
 
-// опоеделяем http-хост
+// определяем http-хост
 if (!defined('SITE_HOST')) {
     $host = rtrim($_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/');
     define('SITE_HOST', $host);
@@ -40,7 +40,7 @@ if (!defined('ADMIN_N')) define('ADMIN_N', 'albireo-admin');
 if (!defined('ADMIN_DIR')) define('ADMIN_DIR', BASE_DIR . ADMIN_N . DIRECTORY_SEPARATOR);
 if (!defined('ADMIN_URL')) define('ADMIN_URL', SITE_URL . ADMIN_N . '/');
 
-// в зависисмости от режима, подключаем разные файлы
+// в зависимости от режима, подключаем разные файлы
 if (defined('GENERATE_STATIC'))
     require SYS_DIR . 'generation.php';
 else

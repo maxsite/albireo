@@ -27,7 +27,7 @@ function getConfigAdmin($key = '')
         return [];
 
     if (!$config) return [];
-    
+
     if ($key)
         return $config[$key] ?? [];
     else
@@ -51,8 +51,7 @@ function encodeURL64(string $str)
 }
 
 /**
- * получение текущей сессии
- * если нужно, запускается механизм php-сессий
+ * Получение текущей сессии, если нужно, запускается механизм php-сессий
  */
 function getSessionId()
 {
@@ -69,8 +68,8 @@ function getSessionId()
 }
 
 /**
- * Проверяет пользователя на разрешения и делает редирект
- * Если их нет, то редиректит на страницу login или access-denied  
+ * Проверяет пользователя на разрешения и делает редирект.
+ * Если их нет, то редиректит на страницу login или access-denied
  * @param  string|array $levels - уровни доступа
  * @param $message - сообщение для страницы access-denied
  **/
@@ -105,7 +104,7 @@ function verifyLogin($level)
 }
 
 /**
- * проверка уровня юзера
+ * Проверка уровня юзера
  * @param $user - массив пользователя
  * @param string|array $level - уровень доступа
  **/
@@ -131,7 +130,7 @@ function checkUserAccess(array $user, $level)
 }
 
 /**
- * проверка юзера по логину и паролю
+ * Проверка юзера по логину и паролю
  * здесь нет проверки на уровень доступа!
  **/
 function checkUser(string $username, string $password)
@@ -167,7 +166,7 @@ function checkUser(string $username, string $password)
 }
 
 /**
- * получить юзера из сессии
+ * Получить юзера из сессии
  * @param $loginOnly - проверить только сам факт логина без проверки на разрешения
  **/
 function getUser($loginOnly = false)
@@ -192,7 +191,7 @@ function getUser($loginOnly = false)
  * Функция из MaxSite CMS для преобразования строки к латинице
  * @param string $slug - входная строка
  * @param boolean $deleteSlash - если true, то удаляются слэши \ и /
- * 
+ *
  **/
 function strToSlug(string $slug, $deleteSlash = true, $deleteDot = false)
 {
@@ -230,8 +229,8 @@ function strToSlug(string $slug, $deleteSlash = true, $deleteDot = false)
 
         "@" => "", "!" => "", ";" => "", ":" => "", "^" => "", "\"" => "",
         "&" => "", "=" => "", "№" => "",
-        // "\\" => "", 
-        // "/" => "", 
+        // "\\" => "",
+        // "/" => "",
         "#" => "",
         "(" => "", ")" => "", "~" => "", "|" => "", "+" => "", "”" => "", "“" => "",
         "'" => "",
@@ -278,7 +277,7 @@ function human_filesize($bytes, $decimals = 2)
 {
     $factor = floor((strlen($bytes) - 1) / 3);
     if ($factor > 0) $sz = 'KMGT';
-    
+
     return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor - 1] . 'B';
 }
 
