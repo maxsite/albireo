@@ -4,23 +4,23 @@
  * (c) Albireo Framework, https://maxsite.org/albireo, 2021
  *
  * Вывод блоков
- * 
+ *
  * Использование:
  * echo Blocks\Blocks::out('top');
  * echo Blocks\Blocks::outID(7);
- * 
+ *
  */
 
 namespace Blocks;
 
 class Blocks
 {
-    /** 
+    /**
      * Вывод блоков по имени (ключу)
      * @param string $key - имя блоков
      * @return string
      */
-    public static function out(string $key)
+    public static function out(string $key): string
     {
         if ($configDB = getConfigFile(CONFIG_DIR . 'dbase.php', 'blocks')) {
             $pdo = \Pdo\PdoConnect::getInstance();
@@ -51,12 +51,12 @@ class Blocks
     }
 
 
-    /** 
+    /**
      * Вывод блока по его ID
      * @param int $id - id блока
      * @return string
      */
-    public static function outId(int $id)
+    public static function outId(int $id): string
     {
         if ($id < 1)  return '';
 
@@ -79,12 +79,12 @@ class Blocks
             return '';
     }
 
-    /** 
+    /**
      * Вывод блока по массиву его данных
      * @param array $block - данные блока
      * @return string
      */
-    public static function outBlock(array $block)
+    public static function outBlock(array $block): string
     {
         // получим весь текст
         $out = $block['blocks_start'] . $block['blocks_content'] . $block['blocks_end'];

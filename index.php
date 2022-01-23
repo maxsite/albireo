@@ -17,7 +17,7 @@ if (!defined('SITE_PROTOCOL')) {
     unset($protocol);
 }
 
-// опоеделяем http-хост
+// определяем http-хост
 if (!defined('SITE_HOST')) {
     $host = rtrim($_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/');
     define('SITE_HOST', $host);

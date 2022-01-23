@@ -6,10 +6,10 @@
 /**
  *  сжатие HTML
  *
- *  @param $text входной текст
+ *  @param string $text входной текст
  *  @return string
  */
-function compress_html($text)
+function compress_html(string $text): string
 {
 	// защищенный текст, который не нужно сжимать
 	$text = preg_replace_callback('!(<pre.*?>)(.*?)(</pre>)!is', '_compress_html_protect', $text);
@@ -47,23 +47,22 @@ function compress_html($text)
  *  script которые загоняются в [html_base64]
  *  callback-функция
  *
- *  @param $matches matches
- *  @return string
+ * @param string $m matches
+ * @return string
  */
-function _compress_html_protect($m)
+function _compress_html_protect(string $m): string
 {
 	return $m[1] . '[html_base64]' . base64_encode($m[2]) . '[/html_base64]' . $m[3];
 }
 
 /**
  *  Сжатие CSS-кода
- *  Работает очень «мягко», чтобы не влиять на сам css-код
- *  callback-функция
+ *  Работает очень «мягко», чтобы не влиять на сам css-код callback-функция
  *
- *  @param $matches matches
- *  @return string
+ * @param string $m matches
+ * @return string
  */
-function _compres_css_protect($m)
+function _compres_css_protect(string $m): string
 {
 	$out = $m[2];
 
