@@ -1,8 +1,9 @@
 <?php if (!defined('BASE_DIR')) exit('No direct script access allowed');
 /**
 
-title: 404 - ничего не найдено
+title: 404 - Page not found
 slug-static: -
+html-lang: en
 
  **/
 

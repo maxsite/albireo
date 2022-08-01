@@ -25,7 +25,7 @@ div(h100vh flex flex-vcenter overflow-hidden)
 
         __(animation-bottom t-gray400 mar5-t animation-delay1s) for Landing pages, Code examples, PHP Study, Static Site Generator <br> Admin panel, Documentation generator
 
-        __(mar30-t animation-bottom animation-delay2s) ✴ <a class="t-white hover-t-yellow200" href="https://maxsite.org/albireo">maxsite.org/albireo</a> ✴
+        __(mar30-t animation-bottom animation-delay2s) ✸ <a class="t-white hover-t-yellow200" href="https://maxsite.org/albireo">maxsite.org/albireo</a> ✸
 
     /div
 /div

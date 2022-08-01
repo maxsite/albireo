@@ -11,6 +11,58 @@
  */
 define('ALBIREO_TIME_START', microtime(true));
 
+
+/**
+ * Получить предпочитаемый язык из браузера
+ *
+ * TODO: Сделать так, чтобы приоритет имела кука hreflang
+ * 
+ * @param  mixed $default — дефолтное значение
+ * @param  mixed $langs — список возможных языков
+ * @return string
+ */
+function detectUserLang(string $default = '', array $langs = []): string
+{
+    $userLangs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+
+    if (!$userLangs) return $default;
+    
+    if ($langs) {
+        foreach ($userLangs as $lang) {
+            $lang = substr($lang, 0, 2);
+    
+            if (in_array($lang, $langs)) return $lang;
+        }
+    } else {
+        if ($lang = substr($userLangs[0], 0, 2))
+            return $lang;
+    }
+
+    return $default;
+}
+
+/**
+ * Вывод языка страницы на основе html-lang или lang
+ * @param string $default - язык по умолчанию
+ * @return string
+ */
+function htmlAttrLang(string $default = 'en')
+{
+    $langPage = getPageData('html-lang');
+
+    if (!$langPage)
+        $langPage = getPageData('lang');
+
+
+    if (!$langPage and $cfgdfl = getConfig('defHtmlLang'))
+        $langPage = $cfgdfl;
+
+    if (!$langPage)
+        $langPage = $default;
+
+    return ($langPage) ? ' lang="' . $langPage . '"'  : '';
+}
+
 /**
  * Добавить данные во flash-сессию
  * https://maxsite.org/page/php-flash-message
@@ -405,7 +457,7 @@ function processingContent(string $content, array $pageData)
  * @param $key - ключ
  * @param $default - значение по умолчанию, если нет в данных страницы
  * @param $before - приставка к результату, если он есть
- * @param $after - корень к результату, если он есть
+ * @param $after - суффикс к результату, если он есть
  */
 function getPageData(string $key,  $default = '', $before = '', $after = '')
 {
@@ -413,7 +465,8 @@ function getPageData(string $key,  $default = '', $before = '', $after = '')
 
     $result = $pageData[$key] ?? $default;
 
-    if ($result) $result = $before . $result . $after;
+    if ($result and is_string($result))
+        $result = $before . $result . $after;
 
     return $result;
 }
@@ -675,7 +728,7 @@ function readPages()
                     // ключ
                     $k = trim(substr($a2, 0, $pos));
 
-                    // если в ключе есть [], то заменим на [*$pseudoRand], чтобы обеспечить его уникальность
+                    // если в ключе есть [], то заменим на [-$pseudoRand], чтобы обеспечить его уникальность
                     // используется для короткой записи, чтобы не указывать уникальный ключ
                     // head[]: что-то
                     // head[]: ещё что-то
@@ -710,9 +763,45 @@ function readPages()
                 $info['slug'] = $slug; // готовый slug
             }
 
+            // если есть ключ lang, то добавлем его к slug
+            // но при этом сохраняем исходный в _slug
+            if (isset($info['lang'])) {
+                $info['_slug'] = $info['slug'];
+
+                $lang = $info['lang'];
+
+                if (strpos($lang, '*') === 0) {
+                    $lang = substr($lang, 1);
+                    $info['lang'] = $lang;
+                } else {
+                    $info['slug'] = $info['lang'] . '/' . $info['slug'];
+                }
+            }
+
+
             $pagesInfo[$file] = $info; // сохраним в общих данных
         }
     }
+
+    // цикл для lang — нужно добавить массив всех одинаковых страниц для
+    // тех, у которых есть lang и совпадает slug
+    // нужно для навигации и <link rel="alternate" hreflang="lang_code" href="url_of_page">
+    // обходим каждый файл
+    foreach ($pagesInfo as $f => $p) {
+        if (isset($p['lang'])) {
+            $pagesInfo[$f]['__langs'] = [];
+
+            foreach ($pagesInfo as $p1) {
+                if (isset($p1['lang']) and $p1['_slug'] == $p['_slug']) {
+                    $k = '_langs[' . $p1['lang'] . ']';
+                    $pagesInfo[$f][$k] = $p1['slug'];
+
+                    $pagesInfo[$f]['__langs'][$p1['lang']] = $p1['slug'];
+                }
+            }
+        }
+    }
+
 
     // сохраняем массив глобально
     setVal('pagesInfo', $pagesInfo);
@@ -960,7 +1049,7 @@ function _protect_pre($matches)
     $text = $matches[2]; // получили нужную часть текста
     $text = htmlspecialchars($matches[2]); // преобразовали в html-сущности
     $text = str_replace('&amp;', '&', $text); // амперсанд вернуть назад, чтобы иметь возможность его использовать в тексте
-    
+
     // закинули в base64
     $text =  '@html_base64@' . base64_encode($matches[1] . $text . $matches[3]) . '@/html_base64@';
 

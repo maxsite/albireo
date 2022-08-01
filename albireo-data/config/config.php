@@ -17,6 +17,10 @@ return [
     // файл вывода по умолчанию в layout
     'layout' => 'main.php',
 
+    // атрибут HTML lang по умолчанию
+    // можно изменить в параметрах страницы html-lang
+    'defHtmlLang' => 'uk',
+
     // каталоги, где ещё могут располагаться страницы, кроме DATA_DIR
     // указывается полный путь
     // 'dirsForPages' => [BASE_DIR . 'my-pages'],
